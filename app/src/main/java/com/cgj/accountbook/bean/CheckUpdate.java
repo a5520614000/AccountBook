@@ -20,6 +20,12 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 检查更新工具类
+ *
+ */
+
+// TODO: 2019-12-07 还没写完
 public class CheckUpdate {
 
 	private static Map<String, String> map = new HashMap<String, String>();

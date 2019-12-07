@@ -25,7 +25,7 @@ import com.cgj.accountbook.dao.MyDataBase;
 
 public class SplashActivity extends Activity implements OnClickListener {
 
-	private static final int DELAYMILLIS = 5000;
+	private static final int DELAYMILLIS = 100;// TODO: 2019-12-07 修改欢迎页面等待时间，减少等待
 	private RelativeLayout spalsh_layout_num;
 	private RelativeLayout spalsh_layout_pic;
 	private EditText et_num;

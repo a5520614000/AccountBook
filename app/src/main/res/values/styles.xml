@@ -109,4 +109,7 @@
         <item name="android:layout_gravity">center</item>
     </style>
 
+    <!--测试勿删，以免报错-->
+    <style name="test">
+    </style>
 </resources>

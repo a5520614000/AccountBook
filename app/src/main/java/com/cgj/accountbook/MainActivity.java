@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     public View content;
     private static Boolean isExit = false;
-    private boolean isInit;
+    private boolean isInit;//“初始化”标记
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private Toolbar toolbar;
@@ -60,9 +60,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (isInit) return;
+        //检查是否已经初始化过界面，初始化即跳过之后。
+        if (isInit) {
+            return;
+        }
+        //初始化界面
         initView();
-        checkUpdate();
+        //检查更新 
+        // TODO: 2019-12-07 检查更新已经被注释掉，愿意是强制转换抛异常，暂不处理 
+//        checkUpdate();
+        //“初始化”标记 为 TRUE；
         isInit = true;
     }
 
@@ -133,6 +140,9 @@ public class MainActivity extends AppCompatActivity {
         }.start();
     }
 
+    /**
+     * 运行一个线程去APP是否需要检查更新
+     */
     private void checkUpdate() {
         new Thread(new Runnable() {
 
@@ -165,15 +175,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        //绑定UI组件
         mDrawerLayout = (DrawerLayout) findViewById(R.id.dl_main_drawer);
         mNavigationView = (NavigationView) findViewById(R.id.nv_main_navigation);
         toolbar = (Toolbar) findViewById(R.id.id_toolbar);
         content = findViewById(R.id.frame_content);
+        //使用系toolbar替换掉系统知道的actionbar
         setSupportActionBar(toolbar);
         ActionBar ab = getSupportActionBar();
+        //断言 等于 if ab==null——>抛异常
         assert ab != null;
+        //添加一个“三横线”的logo放在actionbar上，并可以“点击？”
         ab.setHomeAsUpIndicator(R.drawable.ic_menu);
         ab.setDisplayHomeAsUpEnabled(true);
+        // TODO: 2019-12-07 自定义方法
         setupDrawerContent(mNavigationView);
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar,
                 R.string.open, R.string.close);
@@ -203,7 +218,9 @@ public class MainActivity extends AppCompatActivity {
                 .setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        //关掉侧滑栏
                         mDrawerLayout.closeDrawers();
+                        //判断点击的项目
                         switch (menuItem.getItemId()) {
                             case R.id.nav_home:
                                 initPreView();
@@ -231,13 +248,13 @@ public class MainActivity extends AppCompatActivity {
                                 toolbar.setTitle(getString(R.string.nav_fenpei));
                                 break;
 
-//                            case R.id.nav_count:
-//                                getSupportFragmentManager()
-//                                        .beginTransaction()
-//                                        .replace(R.id.frame_content,
-//                                                new Fragment_Count()).commit();
-//                                toolbar.setTitle(getString(R.string.nav_count));
-//                                break;
+                            //                            case R.id.nav_count:
+                            //                                getSupportFragmentManager()
+                            //                                        .beginTransaction()
+                            //                                        .replace(R.id.frame_content,
+                            //                                                new Fragment_Count()).commit();
+                            //                                toolbar.setTitle(getString(R.string.nav_count));
+                            //                                break;
                             case R.id.nav_about:
                                 startActivity(new Intent(MainActivity.this,
                                         ActivityAbout.class));
@@ -267,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.tool_add) {
-                startActivityForResult(new Intent(MainActivity.this,
+            startActivityForResult(new Intent(MainActivity.this,
                     ActivityAddAccount.class), 1);
             return true;
         }

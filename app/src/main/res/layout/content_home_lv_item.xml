@@ -22,7 +22,7 @@
         android:textColor="@color/color_theme"
         android:textSize="18sp" />
 
-    <com.shenhua.account.ui.NumberProgressBar
+    <com.cgj.accountbook.ui.NumberProgressBar
         android:id="@+id/numberbar"
         style="@style/NumberProgressBar_sp"
         android:layout_width="wrap_content"
