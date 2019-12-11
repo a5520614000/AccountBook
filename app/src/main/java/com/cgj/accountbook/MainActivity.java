@@ -69,9 +69,9 @@ public class MainActivity extends AppCompatActivity {
         JPermissionUtil.requestAllPermission(this);
         //初始化界面
         initView();
-        //检查更新 
-        // TODO: 2019-12-11 暂时屏蔽掉更新，测试好 
-        checkUpdate();
+        //检查更新
+        // TODO: 2019-12-11 暂时屏蔽打开检查更新，方便调试
+//        checkUpdate();
         //“初始化”标记 为 TRUE；
         isInit = true;
     }
@@ -218,8 +218,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
-        navigationView
-                .setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         //关掉侧滑栏

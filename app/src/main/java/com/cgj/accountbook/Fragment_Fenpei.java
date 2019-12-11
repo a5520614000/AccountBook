@@ -33,6 +33,7 @@ public class Fragment_Fenpei extends Fragment {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
+					//初始化数据
 					initData();
 					handler.post(new Runnable() {
 
@@ -81,9 +82,7 @@ public class Fragment_Fenpei extends Fragment {
 		public View getView(int arg0, View arg1, ViewGroup arg2) {
 			final ViewHolder holder;
 			if (arg1 == null) {
-				LayoutInflater inflater = LayoutInflater.from(getContext());
-				arg1 = inflater.inflate(R.layout.content_fenpei_gv_item,
-						(ViewGroup) arg1, false);
+				arg1 = LayoutInflater.from(getContext()).inflate(R.layout.content_fenpei_gv_item, (ViewGroup) arg1, false);
 				holder = new ViewHolder();
 				holder.view = arg1.findViewById(R.id.fenpei_gv_view);
 				holder.tv = (TextView) arg1.findViewById(R.id.fenpei_gv_tv);
@@ -91,7 +90,9 @@ public class Fragment_Fenpei extends Fragment {
 			} else {
 				holder = (ViewHolder) arg1.getTag();
 			}
+			//获得预算
 			LimitData data = mDatas.get(arg0);
+
 			holder.view.setBackgroundColor(Color.parseColor(data.getColor()));
 			holder.tv.setText(data.getType());
 			return arg1;
