@@ -21,13 +21,13 @@ public class MyDataBase {
 	private ArrayList<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
 	private Map<String, Object> map;
 
-	public static final String DATABASE_NAME = "myAccount.db";
-	public static final int DATABASE_VERSION = 1;
-	public static final String TABLE_NAME_ACCOUNT = "accounts";
-	public static final String TABLE_NAME_GROUPS = "groups";
-	public static final String TABLE_NAME_LIMIT = "limits";
-	public static final String TABLE_NAME_INCOME_EXPEND = "srzcs";
-	public static final String TABLE_NAME_INCOME_RECORD = "income_record";
+	public static final String DATABASE_NAME = "myAccount.db";//数据库名
+	public static final int DATABASE_VERSION = 1;//数据库版本
+	public static final String TABLE_NAME_ACCOUNT = "accounts";//
+	public static final String TABLE_NAME_GROUPS = "groups";//
+	public static final String TABLE_NAME_LIMIT = "limits";//
+	public static final String TABLE_NAME_INCOME_EXPEND = "srzcs";//
+	public static final String TABLE_NAME_INCOME_RECORD = "income_record";//
 
 	public float count = 1.0f;
 

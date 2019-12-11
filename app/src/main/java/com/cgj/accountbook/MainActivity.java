@@ -27,8 +27,9 @@ import com.cgj.accountbook.act.ActivityAbout;
 import com.cgj.accountbook.act.ActivityAddAccount;
 import com.cgj.accountbook.act.ActivitySetting;
 import com.cgj.accountbook.bean.CheckUpdate;
-import com.cgj.accountbook.bean.MyApplication;
+import com.cgj.MyApplication;
 import com.cgj.accountbook.bean.MyStringUtils;
+import com.zinc.libpermission.utils.JPermissionUtil;
 
 import org.json.JSONException;
 
@@ -64,14 +65,17 @@ public class MainActivity extends AppCompatActivity {
         if (isInit) {
             return;
         }
+        //检查权限
+        JPermissionUtil.requestAllPermission(this);
         //初始化界面
         initView();
         //检查更新 
-        // TODO: 2019-12-07 检查更新已经被注释掉，愿意是强制转换抛异常，暂不处理 
-//        checkUpdate();
+        // TODO: 2019-12-11 暂时屏蔽掉更新，测试好 
+        checkUpdate();
         //“初始化”标记 为 TRUE；
         isInit = true;
     }
+
 
     private void showUpdateDialog() {
         LayoutInflater layoutInflater = getLayoutInflater();
@@ -154,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void run() {
-                            MyApplication application = (MyApplication) getApplication();
+                            MyApplication application = (MyApplication) getApplicationContext();
                             isSame = MyStringUtils.showVersion(
                                     MainActivity.this, "getcode");
                             if (isSame.equals(map.get("version"))) {
@@ -198,11 +202,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initPreView() {
+        //第一次启动
         String run = MyStringUtils.readSharedpre(MainActivity.this, 0);
         if (run.equals("0")) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frame_content, new Fragment_Home_None())
-                    .commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.frame_content,
+                    new Fragment_Home_None()).commit();
             toolbar.setTitle(getString(R.string.app_name));
         } else {
             getSupportFragmentManager().beginTransaction()
@@ -225,13 +229,13 @@ public class MainActivity extends AppCompatActivity {
                             case R.id.nav_home:
                                 initPreView();
                                 break;
+                            //打开账单历史碎片
                             case R.id.nav_history:
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.frame_content,
-                                                new Fragment_History()).commit();
+                                getSupportFragmentManager().beginTransaction().replace(R.id.frame_content,
+                                        new Fragment_History()).commit();
                                 toolbar.setTitle(getString(R.string.nav_history));
                                 break;
+                            //打开财政预算碎片
                             case R.id.nav_yusuan:
                                 getSupportFragmentManager()
                                         .beginTransaction()
@@ -239,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                                                 new Fragment_Yusuan()).commit();
                                 toolbar.setTitle(getString(R.string.nav_yusuan));
                                 break;
-
+                            //打开使用情况页面
                             case R.id.nav_fenpei:
                                 getSupportFragmentManager()
                                         .beginTransaction()
@@ -255,10 +259,13 @@ public class MainActivity extends AppCompatActivity {
                             //                                                new Fragment_Count()).commit();
                             //                                toolbar.setTitle(getString(R.string.nav_count));
                             //                                break;
+
+                            //打开关于菜单，一个新的activity
                             case R.id.nav_about:
                                 startActivity(new Intent(MainActivity.this,
                                         ActivityAbout.class));
                                 break;
+                            //点击退出
                             case R.id.nav_exit:
                                 MainActivity.this.finish();
                                 System.exit(0);

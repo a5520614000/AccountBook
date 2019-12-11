@@ -33,7 +33,7 @@ public class CheckUpdate {
 	public static Map<String, String> getNewVersion() throws IOException,
 			JSONException {
 		Connection.Response response = Jsoup
-				.connect(MyStringUtils.CURL + MyStringUtils.API_TAKEN)
+				.connect(MyStringUtils.CURL + MyStringUtils.API_TOKEN)
 				.method(Method.GET).ignoreContentType(true).timeout(5000)
 				.execute();
 		JSONObject dataJson = new JSONObject(response.body());

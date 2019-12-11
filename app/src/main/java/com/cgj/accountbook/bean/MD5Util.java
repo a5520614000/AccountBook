@@ -2,6 +2,9 @@ package com.cgj.accountbook.bean;
 
 import java.security.MessageDigest;
 
+/**
+ * MD5工具
+ */
 public class MD5Util {
 
 	public final static String MD5(String s) {

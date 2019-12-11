@@ -36,6 +36,7 @@ public class SplashActivity extends Activity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
+		//
 		password = MyStringUtils.readSharedpre(SplashActivity.this, 2);
 		if (password.equals("0")) {// 未设置密码
 			initMonth();
@@ -50,8 +51,10 @@ public class SplashActivity extends Activity implements OnClickListener {
 				}
 			}, DELAYMILLIS);
 		} else {// 已设置密码
+			//获得字体对象
 			fontLight = Typeface.createFromAsset(this.getAssets(),
 					"fonts/Roboto-Light.ttf");
+			//初始化密码键盘视图
 			initView();
 			initMonth();
 			new Handler().postDelayed(new Runnable() {
@@ -61,7 +64,6 @@ public class SplashActivity extends Activity implements OnClickListener {
 					handler.sendEmptyMessage(1);
 				}
 			}, DELAYMILLIS);
-
 		}
 	}
 
@@ -85,6 +87,7 @@ public class SplashActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 			case 1:
+				//关闭中间的图片视图，打开键盘视图，并增加一个文本修改监听器
 				spalsh_layout_pic.setVisibility(View.GONE);
 				spalsh_layout_num.setVisibility(View.VISIBLE);
 				et_num.addTextChangedListener(et_numChangeListener);
@@ -126,6 +129,9 @@ public class SplashActivity extends Activity implements OnClickListener {
 		}
 	};
 
+	/**
+	 * 启动密码键盘
+	 */
 	private void initView() {
 		spalsh_layout_num = (RelativeLayout) findViewById(R.id.spalsh_layout_num);
 		spalsh_layout_pic = (RelativeLayout) findViewById(R.id.spalsh_layout_pic);
@@ -191,6 +197,7 @@ public class SplashActivity extends Activity implements OnClickListener {
 			et_num.append(".");
 			break;
 		case R.id.delete:
+			//按下此键，执行删除
 			et_num.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,
 					KeyEvent.KEYCODE_DEL));
 			break;

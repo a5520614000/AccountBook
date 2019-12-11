@@ -21,7 +21,6 @@ import android.widget.Toast;
 
 import com.cgj.accountbook.R;
 import com.cgj.accountbook.bean.CheckUpdate;
-import com.cgj.accountbook.bean.MyApplication;
 import com.cgj.accountbook.bean.MyStringUtils;
 
 import org.json.JSONException;
