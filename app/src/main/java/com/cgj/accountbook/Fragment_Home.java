@@ -18,12 +18,18 @@ import android.widget.Toast;
 
 import com.cgj.accountbook.adapter.HomeAccountAdapter;
 import com.cgj.accountbook.bean.MyStringUtils;
+import com.cgj.accountbook.dao.DatabaseUtil;
 import com.cgj.accountbook.dao.MyDataBase;
+import com.cgj.accountbook.util.LogUtil;
+
+import org.xutils.DbManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//主页碎片
 public class Fragment_Home extends Fragment {
 
 	private static final int MSG_GETDATAS_DONE = 0x1;
@@ -36,34 +42,31 @@ public class Fragment_Home extends Fragment {
 	private MyDataBase dataBase;
 	private ArrayList<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
 	private List<Integer> l = new ArrayList<>();
+	private DatabaseUtil db;
+	private String TAG = "Fragment_Home_Exception";
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		if (view == null) {
-			dataBase = new MyDataBase(getContext());
-			dataBase.open();
+//			dataBase = new MyDataBase(getContext());
+			////			dataBase.open();
+			db = DatabaseUtil.getInstance();
 			view = inflater.inflate(R.layout.content_home, container, false);
 			frame_home_head = view.findViewById(R.id.frame_home_head);
 			tv_count = (TextView) view.findViewById(R.id.frame_home_tv_count);
 			tv_info = (TextView) view.findViewById(R.id.frame_home_tv_info);
 			tv_month = (TextView) view.findViewById(R.id.frame_home_tv_month);
-			Typeface typeFace = Typeface.createFromAsset(getActivity()
-					.getAssets(), "fonts/RobotoCondensed-Bold.ttf");
+			Typeface typeFace = Typeface.createFromAsset(getActivity().getAssets(), "fonts/RobotoCondensed-Bold.ttf");
 			tv_count.setTypeface(typeFace);
 			lisView = (ListView) view.findViewById(R.id.frame_home_lv);
-			TextView empty = (TextView) view
-					.findViewById(R.id.frame_home_lv_empty);
+			TextView empty = (TextView) view.findViewById(R.id.frame_home_lv_empty);
 			lisView.setEmptyView(empty);
 			lisView.setOnItemClickListener(new OnItemClickListener() {
 
 				@Override
-				public void onItemClick(AdapterView<?> parent, View view,
-						int position, long id) {
-					Log.e("homelist", Integer.toString(position));
-					Toast.makeText(getContext(),
-							"homelist" + Integer.toString(position),
-							Toast.LENGTH_SHORT).show();
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+					LogUtil.logi(TAG, "位置:"+position);
+					Toast.makeText(getContext(), "homelist" + position, Toast.LENGTH_SHORT).show();
 				}
 			});
 
@@ -76,7 +79,9 @@ public class Fragment_Home extends Fragment {
 
 			@Override
 			public void run() {
-				datas = dataBase.getHomeData();
+//				datas = dataBase.getHomeData();
+				datas = db.getHomeData();
+				LogUtil.logi(TAG,"data的长度"+datas.toString());
 				getHeadInfo();
 				handler.sendEmptyMessage(MSG_GETDATAS_DONE);
 			}
@@ -104,7 +109,7 @@ public class Fragment_Home extends Fragment {
 					new Thread(new UpdateRunnable(i, 40, myHandler, l.get(i)))
 							.start();
 				}
-				dataBase.close();
+//				dataBase.close();
 				break;
 			}
 		}
@@ -163,9 +168,13 @@ public class Fragment_Home extends Fragment {
 		}
 	}
 
+	/**
+	 * 获取顶部信息
+	 */
 	protected void getHeadInfo() {
 		month = MyStringUtils.getSysNowTime(3);
-		float c = dataBase.count;
+//		float c = dataBase.count;
+		float c = 1.0f;
 		if (c == 0.0) {
 			count = "0.00 " + getString(R.string.rmb);
 		} else {

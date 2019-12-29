@@ -29,10 +29,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cgj.accountbook.R;
-import com.cgj.accountbook.bean.AccountData;
+import com.cgj.accountbook.bean.AccountDatabase;
+import com.cgj.accountbook.bean.GroupsDatabase;
+import com.cgj.accountbook.bean.LimitsDatabase;
 import com.cgj.accountbook.bean.MyStringUtils;
+import com.cgj.accountbook.dao.DatabaseUtil;
 import com.cgj.accountbook.dao.MyDataBase;
 import com.cgj.accountbook.ui.TSnackbar;
+import com.cgj.accountbook.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,11 +44,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+//“新增一笔”的页面
 public class ActivityAddAccount extends AppCompatActivity implements
         OnClickListener {
 
     private static final int MSG_SAVE_DONE = 0x1;
     private static final int MSG_SAVE_FALSE = 0x2;
+    private static final String TAG = "AcitivityAddAccount-Exception";
     private ListView lv;
     private String type, money, used, limit;
     private TextView tv_num;
@@ -54,6 +60,7 @@ public class ActivityAddAccount extends AppCompatActivity implements
     private Typeface fontRegular, fontBold, fontThin, fontLight;
     private MyDataBase dataBase;
     private ArrayList<HashMap<String, String>> lists = new ArrayList<>();
+    //bool组
     private SparseBooleanArray sba_cb = new SparseBooleanArray();
     BaseAdapter adapter;
     private int totalDays = 0;
@@ -63,16 +70,25 @@ public class ActivityAddAccount extends AppCompatActivity implements
     private SparseBooleanArray sba_date = new SparseBooleanArray();
     private MyAdapter adapater;
     private String olddate, newdate;
+    private DatabaseUtil databaseUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
+        //初始化界面
         initView();
+        //初始化字体
         initFontType();
+        //获取数据库连接
+        // TODO: 2019-12-25 获取数据库连接
         dataBase = new MyDataBase(this);
+        databaseUtil = DatabaseUtil.getInstance();
+        //打开自定义输入界面
         showNumPickerDialog();
+        //初始化列表数据
         initListData();
+        //初始化日期数据
         initDateData();
     }
 
@@ -126,24 +142,19 @@ public class ActivityAddAccount extends AppCompatActivity implements
         }
 
         @Override
-        public View getView(final int position, View convertView,
-                            ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             final ViewHolder holder;
             final int currentdayposition = position - firstDayOfWeek + 1;
             if (convertView == null) {
-                LayoutInflater inflater = LayoutInflater
-                        .from(ActivityAddAccount.this);
-                convertView = inflater.inflate(
-                        R.layout.dialog_calender_gv_item,
-                        (ViewGroup) convertView, false);
+                LayoutInflater inflater = LayoutInflater.from(ActivityAddAccount.this);
+                convertView = inflater.inflate(R.layout.dialog_calender_gv_item, (ViewGroup) convertView, false);
                 holder = new ViewHolder();
                 holder.tv = (TextView) convertView.findViewById(R.id.tv);
                 holder.tv.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
-                        if (currentdayposition != currentDay
-                                && position >= firstDayOfWeek) {
+                        if (currentdayposition != currentDay && position >= firstDayOfWeek) {
                             if (!(sba_date.get(position))) {
                                 boolean p = !sba_date.get(position);
                                 for (int i = 0; i < day.size() + firstDayOfWeek; i++) {
@@ -165,8 +176,7 @@ public class ActivityAddAccount extends AppCompatActivity implements
                 });
                 if (currentdayposition == currentDay) {// 列表项等于当前日期
                     holder.tv.setTextColor(Color.WHITE);
-                    holder.tv
-                            .setBackgroundResource(R.drawable.calender_circlebg);
+                    holder.tv.setBackgroundResource(R.drawable.calender_circlebg);
                 }
                 convertView.setTag(holder);
             } else {
@@ -176,8 +186,7 @@ public class ActivityAddAccount extends AppCompatActivity implements
 
                 if (sba_date.get(position)) {
                     holder.tv.setTextColor(Color.parseColor("#11CD6E"));
-                    holder.tv
-                            .setBackgroundResource(R.drawable.calender_circlering);
+                    holder.tv.setBackgroundResource(R.drawable.calender_circlering);
 
                     String str = MyStringUtils.getSysNowTime(6)
                             + "-"
@@ -206,8 +215,11 @@ public class ActivityAddAccount extends AppCompatActivity implements
     }
 
     private void initListData() {
-        dataBase.open();
-        lists = dataBase.getPartLimitsDatas();
+        //        dataBase.open();
+        //        lists = dataBase.getPartLimitsDatas();
+        //获取预算
+        lists = databaseUtil.getPartLimitsDatas();
+        //默认0为true，1~list.size()为false。 选择框5选1？
         for (int i = 0; i < lists.size(); i++) {
             sba_cb.put(0, true);
             sba_cb.put(i, false);
@@ -241,18 +253,12 @@ public class ActivityAddAccount extends AppCompatActivity implements
                                 ViewGroup parent) {
                 final ViewHolder holder;
                 if (convertView == null) {
-                    LayoutInflater inflater = LayoutInflater
-                            .from(ActivityAddAccount.this);
-                    convertView = inflater.inflate(
-                            R.layout.activity_ma_leibie_lv_item,
-                            (ViewGroup) convertView, false);
+                    LayoutInflater inflater = LayoutInflater.from(ActivityAddAccount.this);
+                    convertView = inflater.inflate(R.layout.activity_ma_leibie_lv_item, (ViewGroup) convertView, false);
                     holder = new ViewHolder();
-                    holder.view = convertView
-                            .findViewById(R.id.ma_leibie_lv_item_view);
-                    holder.tv = (TextView) convertView
-                            .findViewById(R.id.ma_leibie_lv_item_tv);
-                    holder.cb = (CheckBox) convertView
-                            .findViewById(R.id.ma_leibie_lv_item_cb);
+                    holder.view = convertView.findViewById(R.id.ma_leibie_lv_item_view);
+                    holder.tv = (TextView) convertView.findViewById(R.id.ma_leibie_lv_item_tv);
+                    holder.cb = (CheckBox) convertView.findViewById(R.id.ma_leibie_lv_item_cb);
                     holder.cb.setVisibility(View.VISIBLE);
                     convertView.setTag(holder);
                 } else {
@@ -262,32 +268,33 @@ public class ActivityAddAccount extends AppCompatActivity implements
 
                     @Override
                     public void onClick(View v) {
-                        if (!(sba_cb.get(position))) {
-                            boolean cu = !sba_cb.get(position);
+                        if (!(sba_cb.get(position))) {//该项是false
+                            boolean cu = !sba_cb.get(position);//则cu=true
+                            //把所有项全部置为false
                             for (int i = 0; i < lists.size(); i++) {
                                 sba_cb.put(i, false);
                             }
+                            //把该项置为true
                             sba_cb.put(position, cu);
+                            //通知修改
                             adapter.notifyDataSetChanged();
                         } else {
+                            //把当前项置为true，防止重复点击当前项
                             sba_cb.put(position, true);
                             adapter.notifyDataSetChanged();
                         }
                     }
                 });
-                holder.view.setBackgroundColor(Color.parseColor(lists.get(
-                        position).get("color")));
-                holder.tv.setText(lists.get(position).get("name"));
+                holder.view.setBackgroundColor(Color.parseColor(lists.get(position).get("color")));
+                holder.tv.setText(lists.get(position).get("type"));
                 holder.cb.setChecked(sba_cb.get(position));
                 return convertView;
             }
         };
         lv.setAdapter(adapter);
         lv.setOnItemClickListener(new OnItemClickListener() {
-
             @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (!(sba_cb.get(position))) {
                     boolean cu = !sba_cb.get(position);
                     for (int i = 0; i < lists.size(); i++) {
@@ -301,44 +308,52 @@ public class ActivityAddAccount extends AppCompatActivity implements
     }
 
     private void initFontType() {
-        fontRegular = Typeface.createFromAsset(this.getAssets(),
-                "fonts/RobotoCondensed-Regular.ttf");
-        fontBold = Typeface.createFromAsset(this.getAssets(),
-                "fonts/RobotoCondensed-Bold.ttf");
-        fontThin = Typeface.createFromAsset(this.getAssets(),
-                "fonts/Roboto-Thin.ttf");
-        fontLight = Typeface.createFromAsset(this.getAssets(),
-                "fonts/Roboto-Light.ttf");
+        fontRegular = Typeface.createFromAsset(this.getAssets(), "fonts/RobotoCondensed-Regular.ttf");
+        fontBold = Typeface.createFromAsset(this.getAssets(), "fonts/RobotoCondensed-Bold.ttf");
+        fontThin = Typeface.createFromAsset(this.getAssets(), "fonts/Roboto-Thin.ttf");
+        fontLight = Typeface.createFromAsset(this.getAssets(), "fonts/Roboto-Light.ttf");
     }
 
     private void initView() {
+        //替换工具栏
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         lv = (ListView) findViewById(R.id.add_lv);
         tv_num = (TextView) findViewById(R.id.add_num);
         TextView add_num_2 = (TextView) findViewById(R.id.add_num_2);
+        //设置字体
         tv_num.setTypeface(fontBold);
         add_num_2.setTypeface(fontBold);
+
         add_btn_date = (Button) findViewById(R.id.add_btn_date);
         olddate = MyStringUtils.getSysNowTime(1);
         add_btn_date.setText(olddate);
         newdate = olddate;
+
         add_et_mark = (EditText) findViewById(R.id.add_et_mark);
+        //获取焦点，打开页面即可调出钱的部分?
         tv_num.requestFocus();
         add_btn_date.setOnClickListener(this);
     }
 
     private void showNumPickerDialog() {
-        // TODO showNumPickerDialog
+        //打开自定义的数字键盘
         alertDialog = new AlertDialog.Builder(this, R.style.AlertDialog).create();
         alertDialog.show();
+        //获取alertDialog对象
         Window window = alertDialog.getWindow();
+        //替换layout
         window.setContentView(R.layout.dialog_add_amount);
+        //绑定控件
         final EditText tv_title = (EditText) window.findViewById(R.id.txt_amount);
         TextView txt_rmb = (TextView) window.findViewById(R.id.txt_rmb);
+        //设置et的监听
         MyStringUtils.setPricePoint(tv_title);
+        //设置字体
         tv_title.setTypeface(fontRegular);
         txt_rmb.setTypeface(fontRegular);
+
         Button delete = (Button) window.findViewById(R.id.btn_delete);
         TextView decimal = (TextView) window.findViewById(R.id.decimal);
         TextView digit_1 = (TextView) window.findViewById(R.id.digit_1);
@@ -351,13 +366,13 @@ public class ActivityAddAccount extends AppCompatActivity implements
         TextView digit_8 = (TextView) window.findViewById(R.id.digit_8);
         TextView digit_9 = (TextView) window.findViewById(R.id.digit_9);
         TextView digit_0 = (TextView) window.findViewById(R.id.digit_0);
-        setTypeFont(decimal, digit_1, digit_2, digit_3, digit_4, digit_5,
-                digit_6, digit_7, digit_8, digit_9, digit_0);
+        setTypeFont(decimal, digit_1, digit_2, digit_3, digit_4, digit_5, digit_6, digit_7, digit_8, digit_9, digit_0);
         TextView btn_dia_cacle = (TextView) window.findViewById(R.id.btn_dia_cacle);
         TextView btn_dia_ok = (TextView) window.findViewById(R.id.btn_dia_ok);
         btn_dia_cacle.setOnClickListener(this);
-        numberClick(tv_title, delete, decimal, digit_1, digit_2, digit_3,
-                digit_4, digit_5, digit_6, digit_7, digit_8, digit_9, digit_0);
+        //数字键及.的监听
+        numberClick(tv_title, delete, decimal, digit_1, digit_2, digit_3, digit_4, digit_5, digit_6, digit_7, digit_8, digit_9, digit_0);
+        //确认键的案件监听
         btn_dia_ok.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -381,6 +396,7 @@ public class ActivityAddAccount extends AppCompatActivity implements
                     money = money + ".00";// 2.00
                 }
                 alertDialog.dismiss();
+                //设置该数字到上页面的价格上及刷新日期
                 refreshNum();
             }
         });
@@ -526,21 +542,20 @@ public class ActivityAddAccount extends AppCompatActivity implements
         tv_num.setText(money);
         add_btn_date.setText(newdate);
     }
-
+//
     private void showDatePickerDialog() {
-        // TODO showDatePickerDialog
+        //显示日期选择框
         LayoutInflater layoutInflater = getLayoutInflater();
-        View dilogview = layoutInflater.inflate(R.layout.dialog_calender,
-                (ViewGroup) findViewById(R.id.calender_dialog));
+        View dilogview = layoutInflater.inflate(R.layout.dialog_calender, (ViewGroup) findViewById(R.id.calender_dialog));
+        //绑定控件
         final GridView gv = (GridView) dilogview.findViewById(R.id.calender_gv);
-        final TextView tvdate = (TextView) dilogview
-                .findViewById(R.id.calender_tv_date);
-        final TextView btn_cancle = (TextView) dilogview
-                .findViewById(R.id.calender_btn_cancle);
-        final TextView btn_done = (TextView) dilogview
-                .findViewById(R.id.calender_btn_done);
+        final TextView tvdate = (TextView) dilogview.findViewById(R.id.calender_tv_date);
+        final TextView btn_cancle = (TextView) dilogview.findViewById(R.id.calender_btn_cancle);
+        final TextView btn_done = (TextView) dilogview.findViewById(R.id.calender_btn_done);
+        //替换alertdialog的view
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(dilogview);
+
         tvdate.setText(olddate);
         adapater = new MyAdapter(tvdate);
         gv.setAdapter(adapater);
@@ -570,18 +585,20 @@ public class ActivityAddAccount extends AppCompatActivity implements
         return true;
     }
 
+    //菜单页面
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //点X
         if (item.getItemId() == R.id.tool_cancle) {
             ActivityAddAccount.this.finish();
             return true;
         }
+        //点√。
         if (item.getItemId() == R.id.tool_done) {
             money = tv_num.getText().toString();
             if (money.equals("0.00")) {
                 showSnackbar("金额不能为零！");
             } else {
-
                 new Thread(new Runnable() {
 
                     @Override
@@ -589,22 +606,23 @@ public class ActivityAddAccount extends AppCompatActivity implements
                         for (int i = 0; i < sba_cb.size(); ) {
                             int pos = sba_cb.keyAt(i);
                             if (sba_cb.valueAt(pos)) {
-                                type = lists.get(pos).get("name");
+                                type = lists.get(pos).get("type");
                                 break;
                             }
                             i++;
                         }
                         if (type != null) {
-                            used = dataBase.getProORLimit(0, type);
-                            limit = dataBase.getProORLimit(2, type);
+                            used = databaseUtil.getProORLimit("used",type);
+                            limit = databaseUtil.getProORLimit("limit",type);
+                            LogUtil.logi(TAG,":type："+type);
                             if (saveToDB(used)) {
-                                MyStringUtils.saveSharedpre(
-                                        ActivityAddAccount.this, 0, "1");
+                                MyStringUtils.saveSharedpre(ActivityAddAccount.this, 0, "1");
                                 handler.sendEmptyMessage(MSG_SAVE_DONE);
                             } else {
                                 handler.sendEmptyMessage(MSG_SAVE_FALSE);
                             }
                         } else {
+                            LogUtil.logi(TAG,"类别判断");
                             showSnackbar("请选择一个类别！");
                         }
                     }
@@ -633,45 +651,65 @@ public class ActivityAddAccount extends AppCompatActivity implements
         // TODO saveToDB
         MyStringUtils mUtils = new MyStringUtils();
         mUtils.initDate();
-        AccountData mRecData = new AccountData(1);
+        //        AccountData mRecData = new AccountData(1);
+        //        mRecData.setType(type);
+        //        mRecData.setMoney(money);
+        //        mRecData.setTime(newdate);// 消费时间，格式2016-03-27
+        //        mRecData.setMonth(MyStringUtils.getSysNowTime(3));// 这里是月份
+        //        mRecData.setWeek(MyStringUtils.getDate("week"));
+        //        mRecData.setMark(add_et_mark.getText().toString());
+        //        mRecData.setOther("");
+        String month = MyStringUtils.getSysNowTime(3);
+        AccountDatabase mRecData = new AccountDatabase();
         mRecData.setType(type);
         mRecData.setMoney(money);
-        mRecData.setTime(newdate);// 消费时间，格式2016-03-27
-        mRecData.setMonth(MyStringUtils.getSysNowTime(3));// 这里是月份
+        mRecData.setTime(newdate);
+        mRecData.setMonth(month);
         mRecData.setWeek(MyStringUtils.getDate("week"));
         mRecData.setMark(add_et_mark.getText().toString());
         mRecData.setOther("");
-        long state1 = dataBase.inserDataToAccount(mRecData);// 插入到account数据表中
-        String monthh = MyStringUtils.getSysNowTime(3);
-        boolean s = dataBase.isNameExist("groups", "_month", monthh);
+
+        // 插入到account数据表中
+        int state1 = databaseUtil.save(mRecData);
+
+
+        //        long state1 = dataBase.inserDataToAccount(mRecData);// 插入到account数据表中
+        //        boolean s = dataBase.isNameExist("groups", "_month", month);
+        boolean monthExist = databaseUtil.isNameExist(GroupsDatabase.class, "_month", month);
         long state2 = 1;
-        if (!s) {
+        if (!monthExist) {
+            GroupsDatabase groupsDatabase = new GroupsDatabase();
+            groupsDatabase.setMonth(month);
             // 该月月份不存在，插入这个月份到groups数据表中
-            state2 = dataBase.inserDataToGroup(monthh);
+            state2 = databaseUtil.save(groupsDatabase);
+            //            state2 = dataBase.inserDataToGroup(month);
         }
-        boolean ss = dataBase.isNameExist("limits", "_type", type);
-        if (ss) {
+        boolean limitsExist = databaseUtil.isNameExist(LimitsDatabase.class, "_type", type);
+        //        boolean ss = dataBase.isNameExist("limits", "_type", type);
+        if (limitsExist) {
             if (savaMoney.equals(0)) {// 保存的金额为0，更新这个金额
                 float f = Float.parseFloat(money);
-                dataBase.updateDataTolimitsUsed(type, f);
-                dataBase.updateDataTolimitsLimit(type, limit, String.valueOf(f));
+                databaseUtil.updateDatetoLimitsUsed(type, f);
+                databaseUtil.updateDatetoLimitsLimit(type, limit, String.valueOf(f));
+                //                                dataBase.updateDataTolimitsUsed(type, f);
+                //                                dataBase.updateDataTolimitsLimit(type, limit, String.valueOf(f));
             } else {// 保存的金额不为0，更新这个金额
                 float f = Float.parseFloat(money) + Float.parseFloat(savaMoney);
-                dataBase.updateDataTolimitsUsed(type, f);
+                databaseUtil.updateDatetoLimitsUsed(type, f);
                 if (!limit.equals("0")) {
-                    dataBase.updateDataTolimitsLimit(type, limit,
-                            String.valueOf(f));
+                    databaseUtil.updateDatetoLimitsLimit(type, limit, String.valueOf(f));
+                    //                    dataBase.updateDataTolimitsUsed(type, f);
+                    //                    dataBase.updateDataTolimitsLimit(type, limit, String.valueOf(f));
                 }
             }
         }
-        String month = MyStringUtils.getSysNowTime(3);
-        String zc = dataBase.getSRGL(1, month);
+        //        String month = MyStringUtils.getSysNowTime(3);
+        String zc = databaseUtil.getSRGL(DatabaseUtil.SRZCS_OUTPUT, month);
         if (!zc.equals("0")) {
             float f = Float.parseFloat(money) + Float.parseFloat(zc);
             money = Float.toString(f);
         }
-        dataBase.updateGLSR(month, "_zc", money);
-
+        databaseUtil.updateGLSR(month, DatabaseUtil.SRZCS_OUTPUT, money);
         if (state1 > 0 && state2 > 0) {
             return true;
         } else {
@@ -715,6 +753,6 @@ public class ActivityAddAccount extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        dataBase.close();
+        //        dataBase.close();
     }
 }

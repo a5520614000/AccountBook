@@ -11,6 +11,6 @@
         android:id="@+id/tool_done"
         android:icon="@drawable/ic_done"
         android:title="@string/toolmenu_add_done"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
 
 </menu>

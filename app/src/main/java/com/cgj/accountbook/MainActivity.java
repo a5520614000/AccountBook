@@ -29,6 +29,7 @@ import com.cgj.accountbook.act.ActivitySetting;
 import com.cgj.accountbook.bean.CheckUpdate;
 import com.cgj.MyApplication;
 import com.cgj.accountbook.bean.MyStringUtils;
+import com.cgj.accountbook.util.LogUtil;
 import com.zinc.libpermission.utils.JPermissionUtil;
 
 import org.json.JSONException;
@@ -42,6 +43,8 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    private static final String TAG = "Mainactivity-exception";
     public View content;
     private static Boolean isExit = false;
     private boolean isInit;//“初始化”标记
@@ -145,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * 运行一个线程去APP是否需要检查更新
+     * 运行一个线程去检查APP是否需要更新
      */
     private void checkUpdate() {
         new Thread(new Runnable() {
@@ -205,12 +208,10 @@ public class MainActivity extends AppCompatActivity {
         //第一次启动
         String run = MyStringUtils.readSharedpre(MainActivity.this, 0);
         if (run.equals("0")) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.frame_content,
-                    new Fragment_Home_None()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.frame_content, new Fragment_Home_None()).commit();
             toolbar.setTitle(getString(R.string.app_name));
         } else {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frame_content, new Fragment_Home()).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.frame_content, new Fragment_Home()).commit();
             toolbar.setTitle(getString(R.string.nav_home));
             MenuItem mItem = mNavigationView.getMenu().getItem(0);
             mItem.setChecked(true);
@@ -287,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    //标题的+号
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.tool_add) {

@@ -56,8 +56,7 @@ public class MyStringUtils implements Serializable {
      * @param value
      */
     public static void saveSharedpre(Context context, int mode, String value) {
-        preferences = context.getSharedPreferences(SP_MONTH_LIMIT,
-                Context.MODE_PRIVATE);
+        preferences = context.getSharedPreferences(SP_MONTH_LIMIT, Context.MODE_PRIVATE);
         Editor editor = preferences.edit();
         switch (mode) {
             case 1:
@@ -109,7 +108,7 @@ public class MyStringUtils implements Serializable {
     /**
      * 将String类型数据转换为浮点型数据
      *
-     * @param String型
+     * @param s String型
      * @return float型
      */
     public static float getString2Float(String s) {
@@ -239,8 +238,7 @@ public class MyStringUtils implements Serializable {
     /**
      * 设置金额输入监听
      *
-     * @param 需要监听的edittext
-     * @return 空
+     * @param editText 需要监听的edittext
      */
     public static void setPricePoint(final EditText editText) {
         editText.addTextChangedListener(new TextWatcher() {

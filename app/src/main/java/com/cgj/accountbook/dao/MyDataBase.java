@@ -220,6 +220,7 @@ public class MyDataBase {
 		while (cursor_count.moveToNext()) {
 			count = cursor_count.getFloat(0);
 		}
+		//从limits表中查找所有used不为0的行
 		String sql = "SELECT * FROM limits WHERE _used is not '0';";
 		Cursor cursor = mSqLiteDatabase.rawQuery(sql, null);
 		while (cursor.moveToNext()) {

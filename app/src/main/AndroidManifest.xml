@@ -36,6 +36,7 @@
         <activity android:name="com.cgj.accountbook.act.ActivityMaLeibie" />
         <activity android:name="com.cgj.accountbook.act.ActivityMaGdkx" />
         <activity android:name="com.cgj.accountbook.act.ActivityAboutWeb" />
+        <activity android:name=".test.MyDB"/>
     </application>
 
 </manifest>

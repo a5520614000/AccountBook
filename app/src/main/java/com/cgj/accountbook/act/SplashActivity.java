@@ -22,6 +22,7 @@ import com.cgj.accountbook.R;
 import com.cgj.accountbook.bean.MD5Util;
 import com.cgj.accountbook.bean.MyStringUtils;
 import com.cgj.accountbook.dao.MyDataBase;
+import com.cgj.accountbook.test.MyDB;
 
 public class SplashActivity extends Activity implements OnClickListener {
 
@@ -44,8 +45,9 @@ public class SplashActivity extends Activity implements OnClickListener {
 
 				@Override
 				public void run() {
-					Intent intent = new Intent(SplashActivity.this,
-							MainActivity.class);
+					// TODO: 2019-12-25 更改测试页面入口
+					Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+//					Intent intent = new Intent(SplashActivity.this, MyDB.class);
 					startActivity(intent);
 					SplashActivity.this.finish();
 				}
@@ -118,8 +120,8 @@ public class SplashActivity extends Activity implements OnClickListener {
 					Toast.makeText(SplashActivity.this, "欢迎回来",
 							Toast.LENGTH_SHORT).show();
 					et_num.setText("");
-					Intent intent = new Intent(SplashActivity.this,
-							MainActivity.class);
+					Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+//					Intent intent = new Intent(SplashActivity.this, MyDB.class);
 					startActivity(intent);
 					SplashActivity.this.finish();
 				} else {

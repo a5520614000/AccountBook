@@ -57,15 +57,13 @@ public class HomeAccountAdapter extends BaseAdapter {
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-		holder.tv_title.setText(myList.get(position).get("title").toString());
-		holder.tv_title.setTextColor(Color.parseColor(myList.get(position)
-				.get("color").toString()));
-		holder.pro.setReachedBarColor(Color.parseColor(myList.get(position)
-				.get("color").toString()));
-		holder.pro.setProgressTextColor(Color.parseColor(myList.get(position)
-				.get("color").toString()));
+		holder.tv_title.setText(myList.get(position).get("type").toString());
+		holder.tv_title.setTextColor(Color.parseColor(myList.get(position).get("color").toString()));
+		holder.pro.setReachedBarColor(Color.parseColor(myList.get(position).get("color").toString()));
+		holder.pro.setProgressTextColor(Color.parseColor(myList.get(position).get("color").toString()));
 		holder.pro.setProgress(0);
-		int progress = (Integer) myList.get(position).get("pro");
+		String pro = myList.get(position).get("pro").toString();
+		int progress = Integer.parseInt(pro);
 		holder.pro.setProgress(progress);
 		return convertView;
 	}

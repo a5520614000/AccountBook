@@ -1,6 +1,12 @@
 package com.cgj.accountbook;
 
+import com.cgj.accountbook.bean.GroupsDatabase;
+import com.cgj.accountbook.dao.DatabaseUtil;
+
 import org.junit.Test;
+import org.w3c.dom.ls.LSException;
+
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -10,8 +16,11 @@ import static org.junit.Assert.*;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class ExampleUnitTest {
+    List list =null;
     @Test
     public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+        DatabaseUtil util = DatabaseUtil.getInstance();
+        boolean month = util.isNameExist(GroupsDatabase.class, "_month");
+        System.out.println("month:"+month);
     }
 }
