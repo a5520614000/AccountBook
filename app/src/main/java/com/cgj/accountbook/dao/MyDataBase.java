@@ -158,6 +158,7 @@ public class MyDataBase {
 			}
 			c2.close();
 			return c;
+			//从account表中查找所有@type月的数据总条数
 		case 3:
 			sql = "select count(*) from " + tabName + " where _month='" + type
 					+ "';";
@@ -379,16 +380,18 @@ public class MyDataBase {
 	/**
 	 * 获取一个Cursor
 	 * 
-	 * @param 类型1为account
+	 * @param t 类型1为account
 	 *            ，否则为groups
 	 * @param _groupName
 	 * @return
 	 */
 	public Cursor getAccountByGroups(int t, String _groupName) {
 		if (t == 1) {
+			////返回account表中的，_groupName列的游标集
 			return mSqLiteDatabase.query(TABLE_NAME_ACCOUNT, account,
 					"_month='" + _groupName + "'", null, null, null, null);
 		} else {
+			//返回groups表中的_id,_month,_other的游标集
 			return mSqLiteDatabase.query(TABLE_NAME_GROUPS, groups, null, null,
 					null, null, null);
 		}

@@ -1,6 +1,7 @@
 package com.cgj.accountbook;
 
 import com.cgj.accountbook.bean.GroupsDatabase;
+import com.cgj.accountbook.bean.MyStringUtils;
 import com.cgj.accountbook.dao.DatabaseUtil;
 
 import org.junit.Test;
@@ -19,8 +20,6 @@ public class ExampleUnitTest {
     List list =null;
     @Test
     public void addition_isCorrect() {
-        DatabaseUtil util = DatabaseUtil.getInstance();
-        boolean month = util.isNameExist(GroupsDatabase.class, "_month");
-        System.out.println("month:"+month);
+        System.out.println(198-198>0?1:-1);
     }
 }

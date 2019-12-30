@@ -1,7 +1,5 @@
 package com.cgj.accountbook.dao;
 
-import android.database.Cursor;
-
 import com.cgj.accountbook.bean.LimitsDatabase;
 import com.cgj.accountbook.bean.MyStringUtils;
 import com.cgj.accountbook.bean.SrzcsDatabase;
@@ -337,7 +335,7 @@ public class DatabaseUtil {
                 map = new HashMap<>();
                 float used = Float.parseFloat(u);
                 count += used;
-                map.put("used", u+"");
+                map.put("used", u + "");
                 map.put("color", partLimitsDatas.get(i).get("color"));
                 map.put("type", partLimitsDatas.get(i).get("type"));
                 map.put("pro", String.valueOf(pro1));
@@ -383,5 +381,64 @@ public class DatabaseUtil {
             return s;
         }
 
+    }
+
+    /**
+     * 查询特定表中，type=condition的数据总数
+     *
+     * @param entityType 表的类
+     * @param type       列名
+     * @param condition  条件
+     * @return int总数
+     */
+    public int getCount(Class entityType, String type, String condition) {
+        int count = 0;
+        List all = null;
+        try {
+            all = db.selector(entityType).where(type, "=", condition).findAll();
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+        if (all != null) {
+            return all.size();
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * 查询特定表中，type=condition的对象
+     *
+     * @param entityType 表的类
+     * @param type       列名
+     * @param condition  条件
+     * @return List符合条件的对象
+     */
+    public List getData(Class entityType, String type, String condition) {
+        List all = null;
+        try {
+            all = db.selector(entityType).where(type, "=", condition).findAll();
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+        if (all != null) {
+            return all;
+        } else {
+            return null;
+        }
+    }
+
+    public List findAll(Class entityType) {
+        List all = null;
+        try {
+            all = db.findAll(entityType);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+        if (all != null) {
+            return all;
+        } else {
+            return null;
+        }
     }
 }

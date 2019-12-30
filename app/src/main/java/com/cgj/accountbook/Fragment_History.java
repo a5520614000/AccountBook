@@ -2,6 +2,7 @@ package com.cgj.accountbook;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,13 +15,18 @@ import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.cgj.accountbook.adapter.HistoryExpandableListAdapter;
+import com.cgj.accountbook.bean.GroupsDatabase;
+import com.cgj.accountbook.dao.DatabaseUtil;
 import com.cgj.accountbook.dao.MyDataBase;
 import com.cgj.accountbook.util.LogUtil;
 
+import java.util.List;
 
+//第二页 历史账单
 public class Fragment_History extends Fragment {
 
-    private static final String TAG = "Fragment_History";
+    private static final String TAG = "Fragment_History_Exception";
     private static final String TAGL = "Fragment_History_Low";
     private int[] group_checked = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -38,18 +44,21 @@ public class Fragment_History extends Fragment {
     int groupNameIndex;
     String mygroupName;
     Cursor groupCursor;
+    private DatabaseUtil databaseUtils;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.content_history, container, false);
             tvEmpty = (TextView) view.findViewById(R.id.history_list_empty);
             e_list = (ExpandableListView) view.findViewById(R.id.history_list);
             e_list.setGroupIndicator(null);
             e_list.setEmptyView(tvEmpty);
-            dataBase = new MyDataBase(getContext());
-            dataBase.open();
+
+            databaseUtils= DatabaseUtil.getInstance();
+
+//            dataBase = new MyDataBase(getContext());
+//            dataBase.open();
         }
         ViewGroup parent = (ViewGroup) view.getParent();
         System.out.println(parent != null);
@@ -62,8 +71,7 @@ public class Fragment_History extends Fragment {
 
     public class MyCursrTreeAdapter extends CursorTreeAdapter {
 
-        public MyCursrTreeAdapter(Cursor cursor, Context context,
-                                  boolean autoRequery) {
+        public MyCursrTreeAdapter(Cursor cursor, Context context, boolean autoRequery) {
             super(cursor, context, autoRequery);
         }
 
@@ -76,14 +84,15 @@ public class Fragment_History extends Fragment {
          * @param isExpanded 是否展开状态
          */
         @Override
-        protected void bindGroupView(View view, Context context, Cursor cursor,
-                                     boolean isExpanded) {
+        protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
             //绑定组视图：也就是折叠菜单
             TextView group_title = (TextView) view.findViewById(R.id.group_title);
-            //从游标集中获得_month
+            //从游标集中获得_month的名字
             String group = cursor.getString(GROUP_NAME_INDEX);
             group_title.setText(group);
+            //记录条数
             TextView groupCount = (TextView) view.findViewById(R.id.group_count);
+
             //去account表中查之前从游标集中获得的_month对应的总数
             int count = dataBase.getCount(3, "accounts", group);
             groupCount.setText("[" + count + "]");
@@ -106,8 +115,7 @@ public class Fragment_History extends Fragment {
          * @return
          */
         @Override
-        protected View newGroupView(Context context, Cursor cursor,
-                                    boolean isExpanded, ViewGroup parent) {
+        protected View newGroupView(Context context, Cursor cursor, boolean isExpanded, ViewGroup parent) {
             View view = LayoutInflater.from(getContext()).inflate(
                     R.layout.content_history_e_list_parent_item, parent, false);
             // TODO: 2019-12-08 意义不明
@@ -151,14 +159,16 @@ public class Fragment_History extends Fragment {
     private void initAdapterView() {
         // TODO initAdapterView
         //返回结果集的游标
-        groupCursor = dataBase.getAccountByGroups(0, "");
-        // getActivity().startManagingCursor(groupCursor);
-        groupNameIndex = groupCursor.getColumnIndexOrThrow("_month");
-        myCursorTreeAdapter = new MyCursrTreeAdapter(groupCursor, getContext(),
-                true);
-        e_list.setAdapter(myCursorTreeAdapter);
-        e_list.setOnGroupClickListener(new OnGroupClickListener() {
+//        groupCursor = dataBase.getAccountByGroups(0, "");
+//        // getActivity().startManagingCursor(groupCursor);
+//        groupNameIndex = groupCursor.getColumnIndexOrThrow("_month");
+        //子类视图adapter
+//        myCursorTreeAdapter = new MyCursrTreeAdapter(groupCursor, getContext(), true);
+        List<GroupsDatabase> all = databaseUtils.findAll(GroupsDatabase.class);
+        final HistoryExpandableListAdapter historyExpandableListAdapter = new HistoryExpandableListAdapter(getContext(), all, databaseUtils);
+        e_list.setAdapter(historyExpandableListAdapter);
 
+        e_list.setOnGroupClickListener(new OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v,
                                         int groupPosition, long id) {
@@ -168,7 +178,7 @@ public class Fragment_History extends Fragment {
                 //通知线程数据改变
                 //				((BaseExpandableListAdapter) myCursorTreeAdapter).notifyDataSetChanged();
                 LogUtil.logi(TAGL, "点击了group,所以+1了，现在结果是：" + group_checked[groupPosition]);
-                myCursorTreeAdapter.notifyDataSetChanged();
+                historyExpandableListAdapter.notifyDataSetChanged();
                 return false;
             }
         });
@@ -180,7 +190,7 @@ public class Fragment_History extends Fragment {
 
                 //通知线程数据改变
                 //				((BaseExpandableListAdapter) myCursorTreeAdapter).notifyDataSetChanged();
-                myCursorTreeAdapter.notifyDataSetChanged();
+                historyExpandableListAdapter.notifyDataSetChanged();
                 return false;
             }
         });
@@ -189,8 +199,8 @@ public class Fragment_History extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        groupCursor.close();
-        dataBase.close();
+//        groupCursor.close();
+//        dataBase.close();
     }
 
 }

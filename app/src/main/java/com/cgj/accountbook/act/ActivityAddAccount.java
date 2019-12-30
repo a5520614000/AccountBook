@@ -660,11 +660,13 @@ public class ActivityAddAccount extends AppCompatActivity implements
         //        mRecData.setMark(add_et_mark.getText().toString());
         //        mRecData.setOther("");
         String month = MyStringUtils.getSysNowTime(3);
+        String formattime = MyStringUtils.getSysNowTime(2);
         AccountDatabase mRecData = new AccountDatabase();
         mRecData.setType(type);
         mRecData.setMoney(money);
         mRecData.setTime(newdate);
         mRecData.setMonth(month);
+        mRecData.setOther(formattime);
         mRecData.setWeek(MyStringUtils.getDate("week"));
         mRecData.setMark(add_et_mark.getText().toString());
         mRecData.setOther("");
@@ -680,6 +682,7 @@ public class ActivityAddAccount extends AppCompatActivity implements
         if (!monthExist) {
             GroupsDatabase groupsDatabase = new GroupsDatabase();
             groupsDatabase.setMonth(month);
+            groupsDatabase.setOther(formattime);
             // 该月月份不存在，插入这个月份到groups数据表中
             state2 = databaseUtil.save(groupsDatabase);
             //            state2 = dataBase.inserDataToGroup(month);

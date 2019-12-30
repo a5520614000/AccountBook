@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
     private void initPreView() {
         //第一次启动
         String run = MyStringUtils.readSharedpre(MainActivity.this, 0);
-        if (run.equals("0")) {
+        if (run.equals("-1")) {
             getSupportFragmentManager().beginTransaction().replace(R.id.frame_content, new Fragment_Home_None()).commit();
             toolbar.setTitle(getString(R.string.app_name));
         } else {

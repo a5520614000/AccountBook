@@ -12,6 +12,7 @@ import android.widget.EditText;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -281,4 +282,19 @@ public class MyStringUtils implements Serializable {
 
     }
 
+
+    /**
+     * 将yyyy-MM-dd转换成时间戳
+     * @param data yyyy-MM-dd 日期格式
+     * @return long时间戳
+     */
+    public static long dataToMills(String data) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date parse = simpleDateFormat.parse(data);
+            return parse.getTime();
+        } catch (ParseException e) {
+            return 0;
+        }
+    }
 }
