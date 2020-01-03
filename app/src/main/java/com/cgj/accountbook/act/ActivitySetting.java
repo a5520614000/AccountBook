@@ -168,7 +168,7 @@ public class ActivitySetting extends AppCompatActivity implements OnClickListene
             case R.id.set_rl7:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("确定清空所有数据吗？");
-                builder.setMessage("清空所有数据将删除你的全部消费记录，数据将不可恢复，您可以通过导出记录来备份数据。真的要清空所有数据吗？清空后软件将关闭，打开后重新使用");
+                builder.setMessage("清空所有数据将删除你的全部消费记录，数据将不可恢复，您可以通过导出记录来备份数据。真的要清空所有数据吗？");
                 builder.setPositiveButton("确定",
                         new DialogInterface.OnClickListener() {
 
@@ -178,6 +178,7 @@ public class ActivitySetting extends AppCompatActivity implements OnClickListene
                                 databaseUtil.dropDb();
                                 List all = databaseUtil.findAll(AccountDatabase.class);
                                 if (all==null||all.size()==0){
+                                    Toast.makeText(getBaseContext(),"记录删除成功", Toast.LENGTH_SHORT).show();
                                     databaseUtil.initAccountDatabase();
                                     databaseUtil.initLimitsDatabase();
                                     databaseUtil.initGroupDatabase();
