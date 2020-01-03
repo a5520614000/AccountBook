@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">总体一览</string>
+    <string name="app_name">记账本</string>
     <string name="hello_world">Hello world!</string>
     <string name="nav_home">总体情况</string>
     <string name="nav_history">账单历史</string>
@@ -30,7 +30,7 @@
     <string name="history_lv_empty">暂时还没有账单记录</string>
     <string name="glsr_lv_empty">暂时还没有添加过收入呢</string>
     <string name="lbgl_lv_empty">当前为空</string>
-    <string name="www">http://fir.im/ztyl</string>
+    <string name="www">暂未开通</string>
     <string name="setting_string_leibie">共%d项类别</string>
     <string name="setting_string_kaixiao">已设置%d项</string>
     <string name="setting_string_qingkong">共%d条记录</string>
@@ -38,7 +38,7 @@
 
     <string name="ver01">神话出品 2016 版权所有</string>
     <string name="ver02">All Rights Reserved</string>
-    <string name="string_en_copyright">© 2016 shenhua All Rights Reserved.</string>
+    <string name="string_en_copyright">© 2020 onono/ 2016 shenhua.</string>
     <string name="loginpassword">启动密码</string>
     <string name="setlimit">预算设置</string>
     <string name="month_total_limit">每月限额</string>

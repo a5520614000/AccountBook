@@ -158,7 +158,6 @@ public class NumberProgressBar extends View {
 		mCurrentDrawText = String.format("%d%%", getProgress() * 100 / getMax());
 		mDrawTextWidth = mTextPaint.measureText(mCurrentDrawText);
 		if (getProgress() == 0) {
-			LogUtil.logi(TAG,"进入了getProgress() == 0");
 			mDrawReachedBar = false;
 			mDrawTextStart = getPaddingLeft();
 		} else {

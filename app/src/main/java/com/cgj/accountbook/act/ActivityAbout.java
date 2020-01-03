@@ -19,6 +19,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cgj.MyApplication;
 import com.cgj.accountbook.R;
 import com.cgj.accountbook.bean.CheckUpdate;
 import com.cgj.accountbook.bean.MyStringUtils;
@@ -46,8 +47,7 @@ public class ActivityAbout extends AppCompatActivity implements OnClickListener 
         View dilog = layoutInflater.inflate(R.layout.dialog_update, (ViewGroup) findViewById(R.id.update_dialog));
         TextView ver = (TextView) dilog.findViewById(R.id.update_dialog_tv_ver);
         TextView log = (TextView) dilog.findViewById(R.id.update_dialog_tv_log);
-        TextView size = (TextView) dilog
-                .findViewById(R.id.update_dialog_tv_size);
+        TextView size = (TextView) dilog.findViewById(R.id.update_dialog_tv_size);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("发现新版本");
         ver.setText(map.get("versionShort").toString());
@@ -136,19 +136,21 @@ public class ActivityAbout extends AppCompatActivity implements OnClickListener 
         about_rl2.setOnClickListener(this);
         about_rl3.setOnClickListener(this);
         about_tv_version.setText(MyStringUtils.showVersion(this, "name"));
-        // TODO: 2019-12-06  不能强转，愿意不明 
-//        MyApplication application = (MyApplication) getApplication();
-//        if (application.getVerflag() != null) {
-//            about_verflag.setText(application.getVerflag());
-//        }
+        // TODO: 2019-12-06  因为未注册，已修复
+        MyApplication application = (MyApplication) getApplication();
+        if (application.getVerflag() != null) {
+            about_verflag.setText(application.getVerflag());
+        }
 
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.about_rl1:// 访问官网
-                startActivity(new Intent(ActivityAbout.this, ActivityAboutWeb.class));
+            case R.id.about_rl1:
+                // TODO: 2020-01-03 添加官网 
+//                startActivity(new Intent(ActivityAbout.this, ActivityAboutWeb.class));
+                Toast.makeText(this,"暂未开通", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.about_rl2:// 分享app
                 alertDialog = new AlertDialog.Builder(this,
@@ -156,11 +158,9 @@ public class ActivityAbout extends AppCompatActivity implements OnClickListener 
                 alertDialog.setCancelable(true);
                 alertDialog.show();
                 Window window = alertDialog.getWindow();
-                alertDialog.getWindow().clearFlags(
-                        WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+                alertDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
                 window.setContentView(R.layout.dialog_shareapp);
-                window.findViewById(R.id.share_app_dialog_send).setOnClickListener(
-                        this);
+                window.findViewById(R.id.share_app_dialog_send).setOnClickListener(this);
                 break;
             case R.id.about_rl3:// 检测更新
 

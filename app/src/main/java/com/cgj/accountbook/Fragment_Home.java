@@ -45,8 +45,6 @@ public class Fragment_Home extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		if (view == null) {
-//			dataBase = new MyDataBase(getContext());
-			////			dataBase.open();
 			databaseUtil = DatabaseUtil.getInstance();
 			view = inflater.inflate(R.layout.content_home, container, false);
 			frame_home_head = view.findViewById(R.id.frame_home_head);
@@ -76,7 +74,6 @@ public class Fragment_Home extends Fragment {
 
 			@Override
 			public void run() {
-//				datas = dataBase.getHomeData();
 				datas = databaseUtil.getHomeData();
 				getHeadInfo();
 				handler.sendEmptyMessage(MSG_GETDATAS_DONE);
