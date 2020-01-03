@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,15 +16,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cgj.accountbook.adapter.HomeAccountAdapter;
+import com.cgj.accountbook.bean.AccountData;
+import com.cgj.accountbook.bean.AccountDatabase;
 import com.cgj.accountbook.bean.MyStringUtils;
 import com.cgj.accountbook.dao.DatabaseUtil;
 import com.cgj.accountbook.dao.MyDataBase;
 import com.cgj.accountbook.util.LogUtil;
 
-import org.xutils.DbManager;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,10 +37,9 @@ public class Fragment_Home extends Fragment {
 	private HomeAccountAdapter adapter;
 	private String month, count, info;
 	private MyHandler myHandler;
-	private MyDataBase dataBase;
-	private ArrayList<Map<String, Object>> datas = new ArrayList<Map<String, Object>>();
+	private ArrayList<Map<String, Object>> datas = new ArrayList<>();
 	private List<Integer> l = new ArrayList<>();
-	private DatabaseUtil db;
+	private DatabaseUtil databaseUtil;
 	private String TAG = "Fragment_Home_Exception";
 
 	@Override
@@ -50,7 +47,7 @@ public class Fragment_Home extends Fragment {
 		if (view == null) {
 //			dataBase = new MyDataBase(getContext());
 			////			dataBase.open();
-			db = DatabaseUtil.getInstance();
+			databaseUtil = DatabaseUtil.getInstance();
 			view = inflater.inflate(R.layout.content_home, container, false);
 			frame_home_head = view.findViewById(R.id.frame_home_head);
 			tv_count = (TextView) view.findViewById(R.id.frame_home_tv_count);
@@ -80,8 +77,7 @@ public class Fragment_Home extends Fragment {
 			@Override
 			public void run() {
 //				datas = dataBase.getHomeData();
-				datas = db.getHomeData();
-				LogUtil.logi(TAG,"data的长度"+datas.toString());
+				datas = databaseUtil.getHomeData();
 				getHeadInfo();
 				handler.sendEmptyMessage(MSG_GETDATAS_DONE);
 			}
@@ -173,19 +169,22 @@ public class Fragment_Home extends Fragment {
 	 */
 	protected void getHeadInfo() {
 		month = MyStringUtils.getSysNowTime(3);
-//		float c = dataBase.count;
-		float c = 1.0f;
+		float c = 0;
+		List<AccountDatabase> used = databaseUtil.getData(AccountDatabase.class, "_month", month);
+		for (int i = 0; i < used.size(); i++) {
+			String money = used.get(i).getMoney();
+			c+=Float.parseFloat(money);
+			LogUtil.logi(TAG,"总计消费了:"+c);
+		}
 		if (c == 0.0) {
 			count = "0.00 " + getString(R.string.rmb);
 		} else {
-			count = MyStringUtils.get2dotFloat(c) + " "
-					+ getString(R.string.rmb);
+			count = MyStringUtils.get2dotFloat(c) + " " + getString(R.string.rmb);
 		}
 		if (!(count.equals("0") || count == null)) {
-			float limit = Float.valueOf(MyStringUtils.readSharedpre(
-					getContext(), 1));
+			float limit = Float.valueOf(MyStringUtils.readSharedpre(getContext(), 1));
 			if (limit != 0) {
-				float surplus = limit - dataBase.count;
+				float surplus = limit - c;
 				String sur = MyStringUtils.get2dotFloat(surplus);
 				info = sur + getString(R.string.rmb) + "剩余，直到您达到每月限额";
 				if (surplus == 0)

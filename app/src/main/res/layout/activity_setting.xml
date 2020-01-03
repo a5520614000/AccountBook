@@ -25,7 +25,7 @@
 
                 <TextView
                     style="@style/TextStyle"
-                    android:text="启动密码" />
+                    android:text="@string/loginpassword" />
 
                 <TextView
                     android:id="@+id/set_tv_psw"
@@ -38,7 +38,7 @@
 
                 <TextView
                     style="@style/TextStyle"
-                    android:text="固定开销" />
+                    android:text="@string/setlimit" />
 
                 <TextView
                     android:id="@+id/set_tv_gdkx"
@@ -52,7 +52,7 @@
 
                 <TextView
                     style="@style/TextStyle"
-                    android:text="每月限额" />
+                    android:text="@string/month_total_limit" />
 
                 <TextView
                     android:id="@+id/set_tv_myxe"
@@ -66,7 +66,7 @@
 
                 <TextView
                     style="@style/TextStyle"
-                    android:text="类别管理" />
+                    android:text="@string/category_management" />
 
                 <TextView
                     android:id="@+id/set_tv_lbgl"
@@ -80,7 +80,7 @@
 
                 <TextView
                     style="@style/TextStyle"
-                    android:text="管理收入" />
+                    android:text="@string/yield_management" />
 
                 <TextView
                     android:id="@+id/set_tv_glsr"
@@ -93,7 +93,7 @@
 
                 <TextView
                     style="@style/TextStyle"
-                    android:text="导出消费记录" />
+                    android:text="@string/output_record" />
 
                 <TextView
                     android:id="@+id/set_tv_dcjl"
@@ -106,7 +106,7 @@
 
                 <TextView
                     style="@style/TextStyle"
-                    android:text="清空所有数据" />
+                    android:text="@string/delete_all" />
 
                 <TextView
                     android:id="@+id/set_tv_qksysj"

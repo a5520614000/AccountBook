@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,14 +20,18 @@ import android.widget.Toast;
 
 import com.cgj.accountbook.MainActivity;
 import com.cgj.accountbook.R;
+import com.cgj.accountbook.bean.AccountDatabase;
 import com.cgj.accountbook.bean.MD5Util;
 import com.cgj.accountbook.bean.MyStringUtils;
+import com.cgj.accountbook.dao.DatabaseUtil;
 import com.cgj.accountbook.dao.MyDataBase;
 import com.cgj.accountbook.test.MyDB;
+import com.cgj.accountbook.util.LogUtil;
 
 public class SplashActivity extends Activity implements OnClickListener {
 
 	private static final int DELAYMILLIS = 100;// TODO: 2019-12-07 修改欢迎页面等待时间，减少等待
+	private static final String TAG = "SplashActivity_Exception";
 	private RelativeLayout spalsh_layout_num;
 	private RelativeLayout spalsh_layout_pic;
 	private EditText et_num;
@@ -72,13 +77,13 @@ public class SplashActivity extends Activity implements OnClickListener {
 	private void initMonth() {
 		// TODO 获取月份，判断是否为新一个月
 		String month = MyStringUtils.getSysNowTime(3);
-		MyDataBase dataBase = new MyDataBase(this);
-		dataBase.open();
-		boolean ss = dataBase.isNameExist("accounts", "_month", month);
+		DatabaseUtil databaseUtil = DatabaseUtil.getInstance();
+		boolean ss = databaseUtil.isNameExist(AccountDatabase.class, "_month", month);
 		if (!ss) {
 			// 不同月份，删除limits表中相关数据
+			LogUtil.logi(TAG,"这一月不存在，所有删除re，恢复新一月的主页");
 			MyStringUtils.saveSharedpre(this, 0, "0");
-			dataBase.setDataToZero();
+			databaseUtil.setDataToZero();
 		}
 	}
 
@@ -117,8 +122,7 @@ public class SplashActivity extends Activity implements OnClickListener {
 			num = et_num.getText().toString();
 			if (num.length() == 9) {
 				if (password.equals(MD5Util.MD5(num))) {
-					Toast.makeText(SplashActivity.this, "欢迎回来",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(SplashActivity.this, "欢迎回来", Toast.LENGTH_SHORT).show();
 					et_num.setText("");
 					Intent intent = new Intent(SplashActivity.this, MainActivity.class);
 //					Intent intent = new Intent(SplashActivity.this, MyDB.class);
@@ -200,8 +204,7 @@ public class SplashActivity extends Activity implements OnClickListener {
 			break;
 		case R.id.delete:
 			//按下此键，执行删除
-			et_num.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,
-					KeyEvent.KEYCODE_DEL));
+			et_num.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
 			break;
 		}
 

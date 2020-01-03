@@ -21,13 +21,16 @@ import android.widget.TextView;
 
 import com.cgj.accountbook.R;
 import com.cgj.accountbook.bean.MyStringUtils;
+import com.cgj.accountbook.dao.DatabaseUtil;
 import com.cgj.accountbook.dao.MyDataBase;
+import com.cgj.accountbook.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ActivityMaIncome extends AppCompatActivity {
 
+    private static final String TAG = "ActivityMaIncome_Exception";
     private ArrayList<HashMap<String, String>> lists = new ArrayList<HashMap<String, String>>();
     private Handler handler = new Handler();
     private Toolbar toolbar;
@@ -35,14 +38,16 @@ public class ActivityMaIncome extends AppCompatActivity {
     private MaIncomeAdapter adapter;
     private MyDataBase dataBase;
     private TextView ma_income_lvempty;
+    private DatabaseUtil databaseUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ma_income);
 
-        dataBase = new MyDataBase(this);
-        dataBase.open();
+//        dataBase = new MyDataBase(this);
+//        dataBase.open();
+        databaseUtil=DatabaseUtil.getInstance();
         initView();
         getListData();
 
@@ -52,13 +57,13 @@ public class ActivityMaIncome extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                lists = dataBase.getIncomes();
+//                lists = dataBase.getIncomes();
+                lists = databaseUtil.getIncomes();
                 handler.post(new Runnable() {
 
                     @Override
                     public void run() {
-                        adapter = new MaIncomeAdapter(ActivityMaIncome.this,
-                                lists);
+                        adapter = new MaIncomeAdapter(ActivityMaIncome.this, lists);
                         ma_income_lv.setAdapter(adapter);
                     }
                 });
@@ -76,39 +81,34 @@ public class ActivityMaIncome extends AppCompatActivity {
         HashMap<String, String> myData = new HashMap<String, String>();
         myData.put("_income", income);
         myData.put("_detail", detail);
-        dataBase.inserDataToIncomeRecord(myData);
+        LogUtil.logi(TAG,"income:"+income+", detail:"+detail);
+        databaseUtil.inserDataToIncomeRecord(myData);
         getListData();
         String month = MyStringUtils.getSysNowTime(3);
-        String sr = dataBase.getSRGL(0, month);
+        String sr = databaseUtil.getSRGL(DatabaseUtil.SRZCS_INCOME,month);
         if (!sr.equals("0")) {
             float f = Float.parseFloat(income) + Float.parseFloat(sr);
             income = Float.toString(f);
         }
-        dataBase.updateGLSR(month, "_sr", income);
+        databaseUtil.updateGLSR(month,DatabaseUtil.SRZCS_INCOME,income);
     }
 
     private void showDialog() {
         LayoutInflater inflater = getLayoutInflater();
-        View dialog = inflater.inflate(R.layout.activity_ma_income_dialog,
-                (ViewGroup) findViewById(R.id.maincom_dialog));
-        final EditText editText = (EditText) dialog
-                .findViewById(R.id.maincom_dialog_et);
+        View dialog = inflater.inflate(R.layout.activity_ma_income_dialog, (ViewGroup) findViewById(R.id.maincom_dialog));
+        final EditText editText = (EditText) dialog.findViewById(R.id.maincom_dialog_et);
         MyStringUtils.setPricePoint(editText);
-        final EditText editText2 = (EditText) dialog
-                .findViewById(R.id.maincom_dialog_et2);
-        TextView textView = (TextView) dialog
-                .findViewById(R.id.maincom_dialog_tv);
+        final EditText editText2 = (EditText) dialog.findViewById(R.id.maincom_dialog_et2);
+        TextView textView = (TextView) dialog.findViewById(R.id.maincom_dialog_tv);
         textView.setText("请输入您的收入:");
-        TextView textView2 = (TextView) dialog
-                .findViewById(R.id.maincom_dialog_tv2);
+        TextView textView2 = (TextView) dialog.findViewById(R.id.maincom_dialog_tv2);
         textView2.setText("请输入您的描述:");
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("管理收入");
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                addData(editText.getText().toString(), editText2.getText()
-                        .toString());
+                addData(editText.getText().toString(), editText2.getText().toString());
             }
         });
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -153,7 +153,6 @@ public class ActivityMaIncome extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        dataBase.close();
     }
 
 }
@@ -163,8 +162,7 @@ class MaIncomeAdapter extends BaseAdapter {
     private ArrayList<HashMap<String, String>> lists;
     private Context context;
 
-    public MaIncomeAdapter(Context context,
-                           ArrayList<HashMap<String, String>> map) {
+    public MaIncomeAdapter(Context context, ArrayList<HashMap<String, String>> map) {
         this.context = context;
         this.lists = map;
     }
@@ -189,9 +187,7 @@ class MaIncomeAdapter extends BaseAdapter {
         final ViewHolder holder;
         if (convertView == null) {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
-            convertView = layoutInflater.inflate(
-                    R.layout.activity_ma_income_lv_item,
-                    (ViewGroup) convertView, false);
+            convertView = layoutInflater.inflate(R.layout.activity_ma_income_lv_item, (ViewGroup) convertView, false);
             holder = new ViewHolder();
             holder.money = (TextView) convertView.findViewById(R.id.money);
             holder.time = (TextView) convertView.findViewById(R.id.time);

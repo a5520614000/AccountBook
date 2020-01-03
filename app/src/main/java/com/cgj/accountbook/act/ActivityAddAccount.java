@@ -542,7 +542,8 @@ public class ActivityAddAccount extends AppCompatActivity implements
         tv_num.setText(money);
         add_btn_date.setText(newdate);
     }
-//
+
+    //
     private void showDatePickerDialog() {
         //显示日期选择框
         LayoutInflater layoutInflater = getLayoutInflater();
@@ -612,17 +613,19 @@ public class ActivityAddAccount extends AppCompatActivity implements
                             i++;
                         }
                         if (type != null) {
-                            used = databaseUtil.getProORLimit("used",type);
-                            limit = databaseUtil.getProORLimit("limit",type);
-                            LogUtil.logi(TAG,":type："+type);
-                            if (saveToDB(used)) {
+                            used = databaseUtil.getProORLimit("used", type);
+                            limit = databaseUtil.getProORLimit("limit", type);
+                            boolean b = saveToDB(used);
+                            LogUtil.logi(TAG, "保存成功flag：" + b);
+                            if (b) {
                                 MyStringUtils.saveSharedpre(ActivityAddAccount.this, 0, "1");
+                                String  i=MyStringUtils.readSharedpre(ActivityAddAccount.this,0);
+                                LogUtil.logi(TAG,"Str："+i);
                                 handler.sendEmptyMessage(MSG_SAVE_DONE);
                             } else {
                                 handler.sendEmptyMessage(MSG_SAVE_FALSE);
                             }
                         } else {
-                            LogUtil.logi(TAG,"类别判断");
                             showSnackbar("请选择一个类别！");
                         }
                     }
@@ -651,14 +654,6 @@ public class ActivityAddAccount extends AppCompatActivity implements
         // TODO saveToDB
         MyStringUtils mUtils = new MyStringUtils();
         mUtils.initDate();
-        //        AccountData mRecData = new AccountData(1);
-        //        mRecData.setType(type);
-        //        mRecData.setMoney(money);
-        //        mRecData.setTime(newdate);// 消费时间，格式2016-03-27
-        //        mRecData.setMonth(MyStringUtils.getSysNowTime(3));// 这里是月份
-        //        mRecData.setWeek(MyStringUtils.getDate("week"));
-        //        mRecData.setMark(add_et_mark.getText().toString());
-        //        mRecData.setOther("");
         String month = MyStringUtils.getSysNowTime(3);
         String formattime = MyStringUtils.getSysNowTime(2);
         AccountDatabase mRecData = new AccountDatabase();
@@ -673,10 +668,6 @@ public class ActivityAddAccount extends AppCompatActivity implements
 
         // 插入到account数据表中
         int state1 = databaseUtil.save(mRecData);
-
-
-        //        long state1 = dataBase.inserDataToAccount(mRecData);// 插入到account数据表中
-        //        boolean s = dataBase.isNameExist("groups", "_month", month);
         boolean monthExist = databaseUtil.isNameExist(GroupsDatabase.class, "_month", month);
         long state2 = 1;
         if (!monthExist) {
@@ -685,28 +676,21 @@ public class ActivityAddAccount extends AppCompatActivity implements
             groupsDatabase.setOther(formattime);
             // 该月月份不存在，插入这个月份到groups数据表中
             state2 = databaseUtil.save(groupsDatabase);
-            //            state2 = dataBase.inserDataToGroup(month);
         }
         boolean limitsExist = databaseUtil.isNameExist(LimitsDatabase.class, "_type", type);
-        //        boolean ss = dataBase.isNameExist("limits", "_type", type);
         if (limitsExist) {
             if (savaMoney.equals(0)) {// 保存的金额为0，更新这个金额
                 float f = Float.parseFloat(money);
-                databaseUtil.updateDatetoLimitsUsed(type, f);
-                databaseUtil.updateDatetoLimitsLimit(type, limit, String.valueOf(f));
-                //                                dataBase.updateDataTolimitsUsed(type, f);
-                //                                dataBase.updateDataTolimitsLimit(type, limit, String.valueOf(f));
+                databaseUtil.updataDataToLimitsUsed(type, f);
+                databaseUtil.updataDataToLimitsLimit(type, limit, String.valueOf(f));
             } else {// 保存的金额不为0，更新这个金额
                 float f = Float.parseFloat(money) + Float.parseFloat(savaMoney);
-                databaseUtil.updateDatetoLimitsUsed(type, f);
+                databaseUtil.updataDataToLimitsUsed(type, f);
                 if (!limit.equals("0")) {
-                    databaseUtil.updateDatetoLimitsLimit(type, limit, String.valueOf(f));
-                    //                    dataBase.updateDataTolimitsUsed(type, f);
-                    //                    dataBase.updateDataTolimitsLimit(type, limit, String.valueOf(f));
+                    databaseUtil.updataDataToLimitsLimit(type, limit, String.valueOf(f));
                 }
             }
         }
-        //        String month = MyStringUtils.getSysNowTime(3);
         String zc = databaseUtil.getSRGL(DatabaseUtil.SRZCS_OUTPUT, month);
         if (!zc.equals("0")) {
             float f = Float.parseFloat(money) + Float.parseFloat(zc);

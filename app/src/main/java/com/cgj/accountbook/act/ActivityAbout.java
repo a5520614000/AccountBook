@@ -43,8 +43,7 @@ public class ActivityAbout extends AppCompatActivity implements OnClickListener 
 
     private void showUpdateDialog() {
         LayoutInflater layoutInflater = getLayoutInflater();
-        View dilog = layoutInflater.inflate(R.layout.dialog_update,
-                (ViewGroup) findViewById(R.id.update_dialog));
+        View dilog = layoutInflater.inflate(R.layout.dialog_update, (ViewGroup) findViewById(R.id.update_dialog));
         TextView ver = (TextView) dilog.findViewById(R.id.update_dialog_tv_ver);
         TextView log = (TextView) dilog.findViewById(R.id.update_dialog_tv_log);
         TextView size = (TextView) dilog

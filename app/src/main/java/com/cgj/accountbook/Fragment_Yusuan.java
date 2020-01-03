@@ -19,42 +19,42 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.cgj.accountbook.adapter.LimitListAdapter;
-import com.cgj.accountbook.bean.LimitData;
+import com.cgj.accountbook.bean.LimitsDatabase;
 import com.cgj.accountbook.bean.MyStringUtils;
-import com.cgj.accountbook.dao.MyDataBase;
+import com.cgj.accountbook.dao.DatabaseUtil;
+import com.cgj.accountbook.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Fragment_Yusuan extends Fragment {
 
+    private static final String TAG = "Fragment_Yusuan_Exception";
     private View view;
     private ListView list;
     private LimitListAdapter limitListAdapter;
-    private List<LimitData> mDatas = new ArrayList<LimitData>();
+    private List<LimitsDatabase> mDatas = new ArrayList<>();
     private Handler handler = new Handler();
-    private MyDataBase database;
     private AlertDialog alertDialog;
     private Typeface fontRegular, fontThin;
     String money;
     int count;
     Cursor limitcursor;
+    private DatabaseUtil databaseUtil;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.content_yusuan, container, false);
             list = (ListView) view.findViewById(R.id.fram_yusuan_lv);
-            database = new MyDataBase(getContext());
-            database.open();
-            list.setOnItemClickListener(new OnItemClickListener() {
 
+            //            database = new MyDataBase(getContext());
+            //            database.open();
+            databaseUtil = DatabaseUtil.getInstance();
+            list.setOnItemClickListener(new OnItemClickListener() {
                 @Override
-                public void onItemClick(AdapterView<?> parent, View view,
-                                        int position, long id) {
-                    TextView tv = (TextView) view
-                            .findViewById(R.id.limit_tv_type);
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    TextView tv = (TextView) view.findViewById(R.id.limit_tv_type);
                     showNumPickerDialog(position, tv.getText().toString());
                 }
             });
@@ -63,23 +63,28 @@ public class Fragment_Yusuan extends Fragment {
         if (parent != null) {
             parent.removeView(view);
         }
+        //初始化数据
         initDatas();
         return view;
     }
 
+    /**
+     * 初始化数据
+     */
     private void initDatas() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                count = database.getLimitsCount();
+                //                count = database.getLimitsCount();
+                List<LimitsDatabase> limits = databaseUtil.findAll(LimitsDatabase.class);
+                count = limits.size();
                 mDatas.clear();
-                mDatas = database.getLimits();
+                mDatas = limits;
                 handler.post(new Runnable() {
 
                     @Override
                     public void run() {
-                        limitListAdapter = new LimitListAdapter(getContext(),
-                                mDatas);
+                        limitListAdapter = new LimitListAdapter(getContext(), mDatas);
                         limitListAdapter.notifyDataSetChanged();
                         list.setAdapter(limitListAdapter);
                     }
@@ -89,25 +94,23 @@ public class Fragment_Yusuan extends Fragment {
     }
 
     protected void updataToDBp(int position, String type) {
-        database.updateDataTolimitsLimit(type, money,
-                database.getProORLimit(0, type));
+        String used = databaseUtil.getProORLimit("_used",type);
+        LogUtil.logi(TAG,"used原值："+used);
+        databaseUtil.updataDataToLimitsLimit(type,money,used);
         initDatas();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        database.close();
     }
 
     private void showNumPickerDialog(final int pos, final String type) {
-        alertDialog = new AlertDialog.Builder(getContext(), R.style.AlertDialog)
-                .create();
+        alertDialog = new AlertDialog.Builder(getContext(), R.style.AlertDialog).create();
         alertDialog.show();
         Window window = alertDialog.getWindow();
         window.setContentView(R.layout.dialog_add_amount);
-        final EditText tv_title = (EditText) window
-                .findViewById(R.id.txt_amount);
+        final EditText tv_title = (EditText) window.findViewById(R.id.txt_amount);
         TextView txt_rmb = (TextView) window.findViewById(R.id.txt_rmb);
         MyStringUtils.setPricePoint(tv_title);
         tv_title.setTypeface(fontRegular);
@@ -124,8 +127,7 @@ public class Fragment_Yusuan extends Fragment {
         TextView digit_8 = (TextView) window.findViewById(R.id.digit_8);
         TextView digit_9 = (TextView) window.findViewById(R.id.digit_9);
         TextView digit_0 = (TextView) window.findViewById(R.id.digit_0);
-        setFontType(decimal, digit_1, digit_2, digit_3, digit_4, digit_5,
-                digit_6, digit_7, digit_8, digit_9, digit_0);
+        setFontType(decimal, digit_1, digit_2, digit_3, digit_4, digit_5, digit_6, digit_7, digit_8, digit_9, digit_0);
         TextView btn_dia_cacle = (TextView) window.findViewById(R.id.btn_dia_cacle);
         TextView btn_dia_ok = (TextView) window.findViewById(R.id.btn_dia_ok);
         btn_dia_cacle.setOnClickListener(new OnClickListener() {

@@ -140,7 +140,7 @@ public class MyDataBase {
 		int c = 0;
 		String sql = "";
 		switch (t) {
-		case 1:
+		case 1://获取tabname表type类的数据总量
 			sql = "select " + type + " from " + tabName + ";";
 			Cursor c1 = mSqLiteDatabase.rawQuery(sql, null);
 			while (c1.moveToNext()) {
@@ -150,7 +150,8 @@ public class MyDataBase {
 			}
 			c1.close();
 			return c;
-		case 2:
+
+		case 2://获取该表的数据条数
 			sql = "Select count(*) from " + tabName + ";";
 			Cursor c2 = mSqLiteDatabase.rawQuery(sql, null);
 			while (c2.moveToNext()) {
@@ -158,8 +159,8 @@ public class MyDataBase {
 			}
 			c2.close();
 			return c;
-			//从account表中查找所有@type月的数据总条数
-		case 3:
+
+		case 3://从tabname表中查找所有符合@type月的数据总条数
 			sql = "select count(*) from " + tabName + " where _month='" + type
 					+ "';";
 			Cursor c3 = mSqLiteDatabase.rawQuery(sql, null);
@@ -178,13 +179,11 @@ public class MyDataBase {
 	 * @return LimitData记录
 	 */
 	public List<GdkzData> getLimitsDatas() {
-		Cursor limitcursor = mSqLiteDatabase.rawQuery("select * from limits;",
-				null);
+		Cursor limitcursor = mSqLiteDatabase.rawQuery("select * from limits;", null);
 		List<GdkzData> datas = new ArrayList<GdkzData>();
 		datas.clear();
 		while (limitcursor.moveToNext()) {
-			GdkzData data = new GdkzData(limitcursor.getString(1),
-					limitcursor.getString(4), limitcursor.getString(5));
+			GdkzData data = new GdkzData(limitcursor.getString(1), limitcursor.getString(4), limitcursor.getString(5));
 			datas.add(data);
 		}
 		limitcursor.close();
@@ -216,9 +215,11 @@ public class MyDataBase {
 	 */
 	public ArrayList<Map<String, Object>> getHomeData() {
 		int pro = 0;
+		//查询limits表中uesd的总数
 		String sql_count = "SELECT SUM(_used) AS OrderTotal FROM limits;";
 		Cursor cursor_count = mSqLiteDatabase.rawQuery(sql_count, null);
 		while (cursor_count.moveToNext()) {
+			//把used总数赋予给count
 			count = cursor_count.getFloat(0);
 		}
 		//从limits表中查找所有used不为0的行
@@ -242,11 +243,11 @@ public class MyDataBase {
 	}
 
 	/**
-	 * 获取进度或限额
+	 * 获取limit表中某一列（type）的使用情况、进度或限额
 	 * 
 	 * @param a
 	 * @param type
-	 * @return
+	 * @return String 0=used 1=progress 2=limit
 	 */
 	public String getProORLimit(int a, String type) {
 		String s = "0";
@@ -397,7 +398,7 @@ public class MyDataBase {
 		}
 	}
 
-	// TODO 插入数据方法
+
 	/**
 	 * 向limits表中插入颜色值
 	 * 
@@ -480,10 +481,11 @@ public class MyDataBase {
 	}
 
 	/**
-	 * 更新limits表中的limit值
+	 * 更新limits表中type列的limit和progress的值
 	 * 
 	 * @param type
-	 * @param used
+	 * @param limit
+	 * @param use
 	 * @return
 	 */
 	public int updateDataTolimitsLimit(String type, String limit, String use) {
@@ -495,8 +497,7 @@ public class MyDataBase {
 			content.put("_type", type);
 			content.put("_progress", Integer.toString(pro));
 			content.put("_limit", limit);
-			return mSqLiteDatabase.update(TABLE_NAME_LIMIT, content, "_type=?",
-					new String[] { type });
+			return mSqLiteDatabase.update(TABLE_NAME_LIMIT, content, "_type=?", new String[] { type });
 		} else {
 			return 0;
 		}
@@ -523,7 +524,7 @@ public class MyDataBase {
 	/**
 	 * 删除accounts表中数据
 	 * 
-	 * @param money
+	 * @param tabName 表明
 	 * @return
 	 */
 	public int deleteData(String tabName, String column, String value) {

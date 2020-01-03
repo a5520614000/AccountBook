@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -29,9 +30,13 @@ import com.cgj.accountbook.act.ActivitySetting;
 import com.cgj.accountbook.bean.CheckUpdate;
 import com.cgj.MyApplication;
 import com.cgj.accountbook.bean.MyStringUtils;
+import com.cgj.accountbook.event.MessageEvent;
 import com.cgj.accountbook.util.LogUtil;
 import com.zinc.libpermission.utils.JPermissionUtil;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 
 import java.io.File;
@@ -54,11 +59,13 @@ public class MainActivity extends AppCompatActivity {
     private Map<String, String> map = new HashMap<String, String>();
     private Handler handler = new Handler();
     private String isSame = "";
+    private String mRun;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -77,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
 //        checkUpdate();
         //“初始化”标记 为 TRUE；
         isInit = true;
+        LogUtil.logi(TAG,"第一次检测启动onResume："+mRun);
     }
 
 
@@ -85,8 +93,7 @@ public class MainActivity extends AppCompatActivity {
         View dialog = layoutInflater.inflate(R.layout.dialog_update, (ViewGroup) findViewById(R.id.update_dialog));
         TextView ver = (TextView) dialog.findViewById(R.id.update_dialog_tv_ver);
         TextView log = (TextView) dialog.findViewById(R.id.update_dialog_tv_log);
-        TextView size = (TextView) dialog
-                .findViewById(R.id.update_dialog_tv_size);
+        TextView size = (TextView) dialog.findViewById(R.id.update_dialog_tv_size);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("发现新版本");
         ver.setText(map.get("versionShort"));
@@ -197,8 +204,7 @@ public class MainActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         // TODO: 2019-12-07 自定义方法
         setupDrawerContent(mNavigationView);
-        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar,
-                R.string.open, R.string.close);
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.open, R.string.close);
         mDrawerToggle.syncState();
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         initPreView();
@@ -206,8 +212,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void initPreView() {
         //第一次启动
-        String run = MyStringUtils.readSharedpre(MainActivity.this, 0);
-        if (run.equals("-1")) {
+        mRun = MyStringUtils.readSharedpre(MainActivity.this, 0);
+        LogUtil.logi(TAG,"第一次检测启动initPreView："+ mRun);
+        if (mRun.equals("0")) {
             getSupportFragmentManager().beginTransaction().replace(R.id.frame_content, new Fragment_Home_None()).commit();
             toolbar.setTitle(getString(R.string.app_name));
         } else {
@@ -231,24 +238,21 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             //打开账单历史碎片
                             case R.id.nav_history:
-                                getSupportFragmentManager().beginTransaction().replace(R.id.frame_content,
-                                        new Fragment_History()).commit();
+                                getSupportFragmentManager().beginTransaction().replace(R.id.frame_content, new Fragment_History()).commit();
                                 toolbar.setTitle(getString(R.string.nav_history));
                                 break;
                             //打开财政预算碎片
                             case R.id.nav_yusuan:
                                 getSupportFragmentManager()
                                         .beginTransaction()
-                                        .replace(R.id.frame_content,
-                                                new Fragment_Yusuan()).commit();
+                                        .replace(R.id.frame_content, new Fragment_Yusuan()).commit();
                                 toolbar.setTitle(getString(R.string.nav_yusuan));
                                 break;
                             //打开使用情况页面
                             case R.id.nav_fenpei:
                                 getSupportFragmentManager()
                                         .beginTransaction()
-                                        .replace(R.id.frame_content,
-                                                new Fragment_Fenpei()).commit();
+                                        .replace(R.id.frame_content, new Fragment_Fenpei()).commit();
                                 toolbar.setTitle(getString(R.string.nav_fenpei));
                                 break;
 
@@ -262,8 +266,7 @@ public class MainActivity extends AppCompatActivity {
 
                             //打开关于菜单，一个新的activity
                             case R.id.nav_about:
-                                startActivity(new Intent(MainActivity.this,
-                                        ActivityAbout.class));
+                                startActivity(new Intent(MainActivity.this, ActivityAbout.class));
                                 break;
                             //点击退出
                             case R.id.nav_exit:
@@ -333,5 +336,17 @@ public class MainActivity extends AppCompatActivity {
             this.finish();
             System.exit(0);
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onShowEventMessage(MessageEvent messageEvent){
+        Toast.makeText(this,"收到提示", Toast.LENGTH_SHORT).show();
+        System.exit(0);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

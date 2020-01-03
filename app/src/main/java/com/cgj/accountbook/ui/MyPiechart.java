@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.View;
 
 import com.cgj.accountbook.bean.LimitData;
+import com.cgj.accountbook.bean.LimitsDatabase;
+import com.cgj.accountbook.dao.DatabaseUtil;
 import com.cgj.accountbook.dao.MyDataBase;
 import com.cgj.accountbook.util.LogUtil;
 
@@ -18,8 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MyPiechart extends View {
-    private static String TAG = "MyPiechart";
-    private static String TAGL = "MyPiechartLow";
+    private static String TAG = "MyPiechart_exception";
+    private static String TAGL = "MyPiechar";
     public float[] mExplain = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0};// 起始角度为0
@@ -27,10 +29,11 @@ public class MyPiechart extends View {
     private Paint[] mPaints;
     private Paint bPaint;
     private RectF mBigOval;
-    private ArrayList<HashMap<String, Object>> lists = new ArrayList<HashMap<String, Object>>();
-    private List<LimitData> mDatas = new ArrayList<LimitData>();
+    private ArrayList<HashMap<String, Object>> lists = new ArrayList<HashMap<String, Object>>();//数据数列
+    private List<LimitsDatabase> mDatas = new ArrayList<>();
     private HashMap<String, Object> map;
     public float[] eachPros;// 每一个块所占的角度，总和为360
+    private DatabaseUtil databaseUtil;
 
     public MyPiechart(Context context) {
         super(context);
@@ -70,15 +73,19 @@ public class MyPiechart extends View {
     private void initDatas(Context context) {
         MyDataBase dataBase = new MyDataBase(context);
         dataBase.open();
+        databaseUtil=DatabaseUtil.getInstance();
         float count = 1f;
         mDatas.clear();
-        mDatas = dataBase.getLimits();
-        count = dataBase.getUsedCountFromLimits();
+        mDatas = databaseUtil.findAll(LimitsDatabase.class);
+        for (int i = 0; i < mDatas.size(); i++) {
+            String used = mDatas.get(i).getUsed();
+            count +=Float.parseFloat(used);
+        }
         for (int i = 0; i < mDatas.size(); i++) {
             map = new HashMap<String, Object>();
-            float us = Float.parseFloat(mDatas.get(i).getFenpei_use());
+            float us = Float.parseFloat(mDatas.get(i).getUsed());
             map.put("pro", (us / count) * 360);
-            map.put("color", mDatas.get(i).getColor().toString());
+            map.put("color", mDatas.get(i).getColor());
             lists.add(map);
 
         }
@@ -99,12 +106,10 @@ public class MyPiechart extends View {
     }
 
     private void initDraw() {
-        mBigOval = new RectF(getPaddingLeft(), getPaddingTop(), getWidth()
-                - getPaddingRight(), getHeight() - getPaddingBottom());
+        mBigOval = new RectF(getPaddingLeft(), getPaddingTop(), getWidth() - getPaddingRight(), getHeight() - getPaddingBottom());
         for (int i = 0; i < lists.size(); i++) {
             eachPros[i] = (float) lists.get(i).get("pro");
-            mPaints[i].setColor(Color.parseColor(lists.get(i).get("color")
-                    .toString()));
+            mPaints[i].setColor(Color.parseColor(lists.get(i).get("color").toString()));
         }
     }
 

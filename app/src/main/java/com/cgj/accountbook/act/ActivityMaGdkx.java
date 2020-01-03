@@ -2,6 +2,7 @@ package com.cgj.accountbook.act;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.DatabaseUtils;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,7 +23,9 @@ import android.widget.TextView;
 
 import com.cgj.accountbook.R;
 import com.cgj.accountbook.bean.GdkzData;
+import com.cgj.accountbook.bean.LimitsDatabase;
 import com.cgj.accountbook.bean.MyStringUtils;
+import com.cgj.accountbook.dao.DatabaseUtil;
 import com.cgj.accountbook.dao.MyDataBase;
 
 import java.util.ArrayList;
@@ -38,6 +41,7 @@ public class ActivityMaGdkx extends AppCompatActivity {
 	private GridView gv;
 	private String value;
 	private MyDataBase dataBase;
+	private DatabaseUtil databaseUtil;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +80,7 @@ public class ActivityMaGdkx extends AppCompatActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			TextView tv = (TextView) view
-					.findViewById(R.id.gdkx_gv_item_tv_name);
+			TextView tv = (TextView) view.findViewById(R.id.gdkx_gv_item_tv_name);
 			showSettingDialog(position, tv.getText().toString());
 		}
 	};
@@ -85,9 +88,9 @@ public class ActivityMaGdkx extends AppCompatActivity {
 	private class GdkzAdapter extends BaseAdapter {
 
 		private Context context;
-		private List<GdkzData> datas;
+		private List<LimitsDatabase> datas;
 
-		public GdkzAdapter(Context context, List<GdkzData> datas) {
+		public GdkzAdapter(Context context, List<LimitsDatabase> datas) {
 			this.context = context;
 			this.datas = datas;
 		}
@@ -112,24 +115,20 @@ public class ActivityMaGdkx extends AppCompatActivity {
 			final ViewHolder holder;
 			if (convertView == null) {
 				LayoutInflater mInflater = LayoutInflater.from(context);
-				convertView = mInflater.inflate(
-						R.layout.activity_ma_gdkx_gv_item,
-						(ViewGroup) convertView, false);
+				convertView = mInflater.inflate(R.layout.activity_ma_gdkx_gv_item, (ViewGroup) convertView, false);
 				holder = new ViewHolder();
 				holder.view = convertView.findViewById(R.id.gdkx_gv_item_view);
-				holder.name = (TextView) convertView
-						.findViewById(R.id.gdkx_gv_item_tv_name);
-				holder.limit = (TextView) convertView
-						.findViewById(R.id.gdkx_gv_item_tv_limit);
+				holder.name = (TextView) convertView.findViewById(R.id.gdkx_gv_item_tv_name);
+				holder.limit = (TextView) convertView.findViewById(R.id.gdkx_gv_item_tv_limit);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
-			final GdkzData d = datas.get(position);
+			final LimitsDatabase d = datas.get(position);
 			holder.view.setBackgroundColor(Color.parseColor(d.getColor()));
-			holder.name.setText(d.getName());
-			holder.limit.setText(d.getMoney() + " ￥");
-			if (d.getMoney().equals("0")) {
+			holder.name.setText(d.getType());
+			holder.limit.setText(d.getLimit() + " ￥");
+			if (d.getLimit().equals("0")) {
 				holder.limit.setText("未设置");
 			}
 			return convertView;
@@ -144,10 +143,11 @@ public class ActivityMaGdkx extends AppCompatActivity {
 
 	public class MyAsyncTask extends AsyncTask<Void, Integer, Void> {
 
-		private List<GdkzData> mDatas = new ArrayList<GdkzData>();
+		private List<LimitsDatabase> all = new ArrayList<>();
 		private GridView gridView;
 		private GdkzAdapter adapter;
 		private MyDataBase dataBase;
+		private DatabaseUtil databaseUtil;
 
 		public MyAsyncTask(GridView gridView) {
 			this.gridView = gridView;
@@ -160,30 +160,28 @@ public class ActivityMaGdkx extends AppCompatActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			dataBase = new MyDataBase(getBaseContext());
-			dataBase.open();
-			mDatas = dataBase.getLimitsDatas();
+//			dataBase = new MyDataBase(getBaseContext());
+//			dataBase.open();
+			databaseUtil = DatabaseUtil.getInstance();
+			all = databaseUtil.findAll(LimitsDatabase.class);
+//			mDatas = dataBase.getLimitsDatas();
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-			adapter = new GdkzAdapter(ActivityMaGdkx.this, mDatas);
+			adapter = new GdkzAdapter(ActivityMaGdkx.this, all);
 			gridView.setAdapter(adapter);
-			dataBase.close();
 		}
 
 	}
 
 	protected void showSettingDialog(final int pos, final String type) {
 		LayoutInflater layoutInflater = getLayoutInflater();
-		View dilog = layoutInflater.inflate(R.layout.activity_setting_dialog,
-				(ViewGroup) findViewById(R.id.setting_dialog));
-		final EditText eText = (EditText) dilog
-				.findViewById(R.id.setting_dialog_et);
-		final TextView tView = (TextView) dilog
-				.findViewById(R.id.setting_dialog_tv);
+		View dilog = layoutInflater.inflate(R.layout.activity_setting_dialog, (ViewGroup) findViewById(R.id.setting_dialog));
+		final EditText eText = (EditText) dilog.findViewById(R.id.setting_dialog_et);
+		final TextView tView = (TextView) dilog.findViewById(R.id.setting_dialog_tv);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
 			@Override
@@ -196,7 +194,6 @@ public class ActivityMaGdkx extends AppCompatActivity {
 			}
 		});
 		builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 
@@ -210,12 +207,13 @@ public class ActivityMaGdkx extends AppCompatActivity {
 	}
 
 	protected void updataToDBp(int position, String type) {
-		dataBase = new MyDataBase(this);
-		dataBase.open();
-		dataBase.updateDataTolimitsLimit(type, value,
-				dataBase.getProORLimit(0, type));
+//		dataBase = new MyDataBase(this);
+//		dataBase.open();
+		databaseUtil = DatabaseUtil.getInstance();
+		databaseUtil.updataDataToLimitsLimit(type,value,databaseUtil.getProORLimit("_used",type));
+//		dataBase.updateDataTolimitsLimit(type, value, dataBase.getProORLimit(0, type));
 		initData();
-		dataBase.close();
+//		dataBase.close();
 	}
 
 }

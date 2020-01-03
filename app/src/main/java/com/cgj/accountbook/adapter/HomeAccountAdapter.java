@@ -19,8 +19,7 @@ public class HomeAccountAdapter extends BaseAdapter {
 	private ArrayList<Map<String, Object>> myList;
 	private Context myContext;
 
-	public HomeAccountAdapter(ArrayList<Map<String, Object>> myList,
-			Context mContext) {
+	public HomeAccountAdapter(ArrayList<Map<String, Object>> myList, Context mContext) {
 		this.myList = myList;
 		this.myContext = mContext;
 	}
@@ -45,13 +44,10 @@ public class HomeAccountAdapter extends BaseAdapter {
 		final ViewHolder holder;
 		if (convertView == null) {
 			LayoutInflater mInflater = LayoutInflater.from(myContext);
-			convertView = mInflater.inflate(R.layout.content_home_lv_item,
-					(ViewGroup) convertView, false);
+			convertView = mInflater.inflate(R.layout.content_home_lv_item, (ViewGroup) convertView, false);
 			holder = new ViewHolder();
-			holder.tv_title = (TextView) convertView
-					.findViewById(R.id.home_lv_view_tv_title);
-			holder.pro = (NumberProgressBar) convertView
-					.findViewById(R.id.numberbar);
+			holder.tv_title = (TextView) convertView.findViewById(R.id.home_lv_view_tv_title);
+			holder.pro = (NumberProgressBar) convertView.findViewById(R.id.numberbar);
 			holder.pro.setMax(100);
 			convertView.setTag(holder);
 		} else {

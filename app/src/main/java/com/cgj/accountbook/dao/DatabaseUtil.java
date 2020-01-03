@@ -1,18 +1,28 @@
 package com.cgj.accountbook.dao;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+
+import com.cgj.accountbook.bean.AccountDatabase;
+import com.cgj.accountbook.bean.GroupsDatabase;
+import com.cgj.accountbook.bean.IncomeRecordDatabase;
 import com.cgj.accountbook.bean.LimitsDatabase;
 import com.cgj.accountbook.bean.MyStringUtils;
 import com.cgj.accountbook.bean.SrzcsDatabase;
 import com.cgj.accountbook.util.LogUtil;
 
 import org.xutils.DbManager;
+import org.xutils.db.sqlite.WhereBuilder;
 import org.xutils.ex.DbException;
 import org.xutils.x;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.cgj.accountbook.dao.MyDataBase.TABLE_NAME_LIMIT;
 
 /**
  * @author onono
@@ -106,30 +116,29 @@ public class DatabaseUtil {
     }
 
     /**
-     * 修改：更新limits表的limit值（更新预算）
+     * 修改：limits表中某一列（condition）列的limit和progress的值
      *
      * @param condition 用于查找需要修改的行，（type的值）
      * @param limit     预算
-     * @param use       金额
+     * @param used      金额
      * @return 1成功 0失败
      */
-    public int updateDatetoLimitsLimit(String condition, String limit, String use) {
+    public int updataDataToLimitsLimit(String condition, String limit, String used) {
         float l = MyStringUtils.getString2Float(limit);
-        float u = MyStringUtils.getString2Float(use);
-        List<?> type = null;
+        float u = MyStringUtils.getString2Float(used);
+        LimitsDatabase data = null;
         try {
-            type = db.selector(LimitsDatabase.class).where("_type", "=", condition).findAll();
+            data = db.selector(LimitsDatabase.class).where("_type", "=", condition).findFirst();
         } catch (DbException e) {
             e.printStackTrace();
         }
-        if (type != null) {
+        if (data != null) {
             if (l != 0) {
-                LimitsDatabase obj = (LimitsDatabase) type.get(0);
                 int pro = (int) ((u / l) * 100);
-                obj.setProgress(Integer.toString(pro));
-                obj.setLimit(limit);
+                data.setProgress(Integer.toString(pro));
+                data.setLimit(limit);
                 try {
-                    db.update(obj, "_limit", "_progress");
+                    db.update(data, "_limit", "_progress");
                     return 1;
                 } catch (DbException e) {
                     e.printStackTrace();
@@ -147,20 +156,19 @@ public class DatabaseUtil {
      * @param condition 用于查找需要修改的行，（type的值）
      * @param used      金额
      */
-    public void updateDatetoLimitsUsed(String condition, float used) {
-        List<?> type = null;
+    public void updataDataToLimitsUsed(String condition, float used) {
+        LimitsDatabase data = null;
         try {
-            type = db.selector(LimitsDatabase.class).where("_type", "=", condition).findAll();
+            data = db.selector(LimitsDatabase.class).where("_type", "=", condition).findFirst();
         } catch (DbException e) {
             e.printStackTrace();
         }
-        if (type != null) {
-            LimitsDatabase obj = (LimitsDatabase) type.get(0);
+        if (data != null) {
             String used1 = MyStringUtils.get2dotFloat(used);
             //            obj.setType(condition);
-            obj.setUsed(used1);
+            data.setUsed(used1);
             try {
-                db.update(obj, "_used");
+                db.update(data, "_used");
             } catch (DbException e) {
                 e.printStackTrace();
             }
@@ -325,20 +333,29 @@ public class DatabaseUtil {
         int count = 0;//当月总消费
         int pro = 0;//当月消费占比
         Map<String, Object> map;
+        List<LimitsDatabase> used_nozero = null;
         //当月总消费计算
         ArrayList<Map<String, Object>> datas = new ArrayList<>();
-        ArrayList<HashMap<String, String>> partLimitsDatas = getPartLimitsDatas();
-        for (int i = 0; i < partLimitsDatas.size(); i++) {
-            String u = partLimitsDatas.get(i).get("used");
+        try {
+            used_nozero = db.selector(LimitsDatabase.class).where("used", ">", "0").findAll();
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < used_nozero.size(); i++) {
+            float v = Float.parseFloat(used_nozero.get(i).getUsed());
+            count+=v;
+        }
+        for (int i = 0; i < used_nozero.size(); i++) {
+            map = new HashMap<>();
+            String u = used_nozero.get(i).getUsed();
             if (u != null) {
+                float used = Float.parseFloat(u);
                 int pro1 = (int) ((Float.parseFloat(u) / count) * 100);
                 map = new HashMap<>();
-                float used = Float.parseFloat(u);
-                count += used;
-                map.put("used", u + "");
-                map.put("color", partLimitsDatas.get(i).get("color"));
-                map.put("type", partLimitsDatas.get(i).get("type"));
-                map.put("pro", String.valueOf(pro1));
+                map.put("used", u);
+                map.put("color", used_nozero.get(i).getColor());
+                map.put("type", used_nozero.get(i).getType());
+                map.put("pro", pro1);
                 datas.add(map);
 
             }
@@ -348,28 +365,28 @@ public class DatabaseUtil {
     }
 
     /**
-     * 获取进度或限额
+     * 获取limit表中某一列（type）中某一行（name）的进度或限额
      *
-     * @param a
+     * @param type 列名
      * @param type
      * @return
      */
-    public String getProORLimit(String a, String type) {
+    public String getProORLimit(String type, String name) {
         String s = "0";
         LimitsDatabase first = null;
         try {
-            first = db.selector(LimitsDatabase.class).where("_type", "=", type).findFirst();
+            first = db.selector(LimitsDatabase.class).where("_type", "=", name).findFirst();
         } catch (DbException e) {
             e.printStackTrace();
         }
-        switch (a) {
-            case "used":
+        switch (type) {
+            case "_used":
                 s = first.getUsed();
                 break;
-            case "limit":
+            case "_limit":
                 s = first.getLimit();
                 break;
-            case "pro":
+            case "_progress":
                 s = first.getProgress();
                 break;
             default:
@@ -428,6 +445,12 @@ public class DatabaseUtil {
         }
     }
 
+    /**
+     * 获取entityType类的所有数据
+     *
+     * @param entityType 表的类名
+     * @return
+     */
     public List findAll(Class entityType) {
         List all = null;
         try {
@@ -441,4 +464,211 @@ public class DatabaseUtil {
             return null;
         }
     }
+
+    /**
+     * 初始化Account表
+     */
+    public void initAccountDatabase() {
+        AccountDatabase accountDatabase = new AccountDatabase();
+        accountDatabase.setId(1);
+        accountDatabase.setMonth("初始化");
+        try {
+            db.save(accountDatabase);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 初始化GroupDatabase表
+     */
+    public void initGroupDatabase() {
+        GroupsDatabase groupsDatabase = new GroupsDatabase();
+        //        String month = MyStringUtils.getDate("month");
+        Calendar calendar = Calendar.getInstance();
+        int i = calendar.get(Calendar.MONTH);
+        String month = null;
+        switch (i) {
+            case 0:
+                month = "一月";
+                break;
+            case 1:
+                month = "二月";
+                break;
+            case 2:
+                month = "三月";
+                break;
+            case 3:
+                month = "四月";
+                break;
+            case 4:
+                month = "五月";
+                break;
+            case 5:
+                month = "六月";
+                break;
+            case 6:
+                month = "七月";
+                break;
+            case 7:
+                month = "八月";
+                break;
+            case 8:
+                month = "九月";
+                break;
+            case 9:
+                month = "十月";
+                break;
+            case 10:
+                month = "十一月";
+                break;
+            case 11:
+                month = "十二月";
+                break;
+            default:
+                break;
+        }
+        groupsDatabase.setOther(MyStringUtils.getSysNowTime(2));
+        groupsDatabase.setMonth(month);
+        try {
+            db.save(groupsDatabase);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 删除数据库
+     */
+    public void dropDb() {
+        try {
+            db.dropDb();
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 获取income_record表的数据
+     *
+     * @return ArrayList 收入数据
+     */
+    public ArrayList<HashMap<String, String>> getIncomes() {
+        ArrayList<HashMap<String, String>> lists = new ArrayList<>();
+        List<IncomeRecordDatabase> all = null;
+        try {
+            all = db.findAll(IncomeRecordDatabase.class);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+        if (all != null && all.size() != 0) {
+            for (int i = 0; i < all.size(); i++) {
+                HashMap<String, String> map = new HashMap<>();
+                IncomeRecordDatabase database = all.get(i);
+                map.put("_money", database.getIncome());
+                map.put("_time", database.getTime());
+                map.put("_detail", database.getDetail());
+                lists.add(map);
+            }
+
+        }
+        return lists;
+    }
+
+    /**
+     * 插入：向income记录表中加入数据
+     *
+     * @param myData 数据map
+     * @return
+     */
+    public long inserDataToIncomeRecord(HashMap<String, String> myData) {
+        String formatTime = MyStringUtils.getSysNowTime(1);
+        IncomeRecordDatabase incomeRecordDatabase = new IncomeRecordDatabase();
+        incomeRecordDatabase.setTime(formatTime);
+        incomeRecordDatabase.setIncome(myData.get("_income"));
+        incomeRecordDatabase.setDetail(myData.get("_detail"));
+        try {
+            db.save(incomeRecordDatabase);
+            return 1;
+        } catch (DbException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * 初始化收入支出表
+     *
+     * @return
+     */
+    public void initSrzcsDatabase() {
+        SrzcsDatabase srzcsDatabase;
+        for (int i = 0; i < 12; i++) {
+            srzcsDatabase = new SrzcsDatabase();
+            srzcsDatabase.setId(i);
+            srzcsDatabase.setSr("0");
+            srzcsDatabase.setZc("0");
+            srzcsDatabase.setMonth(MyStringUtils.monthStrings[i]);
+            String nowTime = MyStringUtils.getSysNowTime(2);
+            srzcsDatabase.setOther(nowTime);
+            try {
+                db.save(srzcsDatabase);
+            } catch (DbException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 删除accounts表中数据
+     *
+     * @param entityType 表的类名
+     * @param type       哪一列（列名）
+     * @param condition  哪一列中哪一行（值）
+     * @return
+     */
+    public int deleteData(Class entityType, String type, String condition) {
+        int i = 0;
+        try {
+            i = db.delete(entityType, WhereBuilder.b(type, "=", condition));
+
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+        return i;
+    }
+
+    /**
+     * 向limits表中插入颜色值
+     * @param type
+     * @param value
+     * @return
+     */
+    public void insertDataToLimitColor(String type, String value) {
+        LimitsDatabase database = new LimitsDatabase();
+        database.setType(type);
+        database.setLimit("0");
+        database.setUsed("0");
+        database.setProgress("0");
+        database.setColor(value);
+        try {
+            db.save(database);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 删除：将limits表中的used，progress值置零
+     *
+     *
+     */
+    public void setDataToZero() {
+        try {
+            db.delete(LimitsDatabase.class,WhereBuilder.b("_used","=","0"));
+            db.delete(LimitsDatabase.class,WhereBuilder.b("_progress","=","0"));
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

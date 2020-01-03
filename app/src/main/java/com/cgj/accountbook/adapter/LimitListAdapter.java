@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.cgj.accountbook.R;
 import com.cgj.accountbook.bean.LimitData;
+import com.cgj.accountbook.bean.LimitsDatabase;
 import com.cgj.accountbook.ui.MyGradientProgressBar;
 
 import java.util.ArrayList;
@@ -17,10 +18,10 @@ import java.util.List;
 
 public class LimitListAdapter extends BaseAdapter {
 
-	private List<LimitData> datas = new ArrayList<LimitData>();
+	private List<LimitsDatabase> datas = new ArrayList<>();
 	private Context context;
 
-	public LimitListAdapter(Context context, List<LimitData> datas) {
+	public LimitListAdapter(Context context, List<LimitsDatabase> datas) {
 		this.context = context;
 		this.datas = datas;
 	}
@@ -45,22 +46,17 @@ public class LimitListAdapter extends BaseAdapter {
 		final ViewHolder holder;
 		if (convertView == null) {
 			LayoutInflater mInflater = LayoutInflater.from(context);
-			convertView = mInflater.inflate(R.layout.content_yusuan_lv_item,
-					(ViewGroup) convertView, false);
+			convertView = mInflater.inflate(R.layout.content_yusuan_lv_item, (ViewGroup) convertView, false);
 			holder = new ViewHolder();
-			holder.tv_type = (TextView) convertView
-					.findViewById(R.id.limit_tv_type);
-			holder.tv_used = (TextView) convertView
-					.findViewById(R.id.limit_tv_used);
-			holder.tv_limit = (TextView) convertView
-					.findViewById(R.id.limit_tv_limit);
-			holder.progressBar = (MyGradientProgressBar) convertView
-					.findViewById(R.id.limit_progress);
+			holder.tv_type = (TextView) convertView.findViewById(R.id.limit_tv_type);
+			holder.tv_used = (TextView) convertView.findViewById(R.id.limit_tv_used);
+			holder.tv_limit = (TextView) convertView.findViewById(R.id.limit_tv_limit);
+			holder.progressBar = (MyGradientProgressBar) convertView.findViewById(R.id.limit_progress);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-		LimitData data = datas.get(position);
+		LimitsDatabase data = datas.get(position);
 		holder.tv_type.setText(data.getType());
 		holder.tv_used.setText(data.getUsed());
 		holder.tv_limit.setText(data.getLimit());

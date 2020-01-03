@@ -12,9 +12,12 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.cgj.accountbook.R;
+import com.cgj.accountbook.util.LogUtil;
 
+//主页柱状图view
 public class NumberProgressBar extends View {
 
+	private static final String TAG = "NumberProgressBar_Exception";
 	public Context mContext;
 	private int mMax = 100;
 	private int mProgress = 0;
@@ -61,41 +64,28 @@ public class NumberProgressBar extends View {
 		this(context, attrs, R.attr.numberProgressBarStyle);
 	}
 
-	public NumberProgressBar(Context context, AttributeSet attrs,
-			int defStyleAttr) {
+	public NumberProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		this.mContext = context;
 		default_reached_bar_height = dp2px(1.5f);
 		default_unreached_bar_height = dp2px(1.0f);
 		default_text_size = sp2px(10);
 		default_progress_text_offset = dp2px(3.0f);
-		final TypedArray attributes = context.obtainStyledAttributes(attrs,
-				R.styleable.NumberProgressBar, defStyleAttr, 0);
-		mReachedBarColor = attributes.getColor(
-				R.styleable.NumberProgressBar_progress_reached_color,
-				default_reached_color);
-		mUnreachedBarColor = attributes.getColor(
-				R.styleable.NumberProgressBar_progress_unreached_color,
-				default_unreached_color);
-		mTextColor = attributes.getColor(
-				R.styleable.NumberProgressBar_progress_text_color,
-				default_text_color);
-		mTextSize = attributes.getDimension(
-				R.styleable.NumberProgressBar_progress_text_size,
-				default_text_size);
-		mReachedBarHeight = attributes.getDimension(
-				R.styleable.NumberProgressBar_progress_reached_bar_height,
-				default_reached_bar_height);
-		mUnreachedBarHeight = attributes.getDimension(
-				R.styleable.NumberProgressBar_progress_unreached_bar_height,
-				default_unreached_bar_height);
-		mOffset = attributes.getDimension(
-				R.styleable.NumberProgressBar_progress_text_offset,
-				default_progress_text_offset);
-		setProgress(attributes
-				.getInt(R.styleable.NumberProgressBar_progress, 0));
+		final TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.NumberProgressBar, defStyleAttr, 0);
+		mReachedBarColor = attributes.getColor(R.styleable.NumberProgressBar_progress_reached_color, default_reached_color);
+		mUnreachedBarColor = attributes.getColor(R.styleable.NumberProgressBar_progress_unreached_color, default_unreached_color);
+		mTextColor = attributes.getColor(R.styleable.NumberProgressBar_progress_text_color, default_text_color);
+		mTextSize = attributes.getDimension(R.styleable.NumberProgressBar_progress_text_size, default_text_size);
+		mReachedBarHeight = attributes.getDimension(R.styleable.NumberProgressBar_progress_reached_bar_height, default_reached_bar_height);
+		mUnreachedBarHeight = attributes.getDimension(R.styleable.NumberProgressBar_progress_unreached_bar_height, default_unreached_bar_height);
+		mOffset = attributes.getDimension(R.styleable.NumberProgressBar_progress_text_offset, default_progress_text_offset);
+
+		setProgress(attributes.getInt(R.styleable.NumberProgressBar_progress, 0));
+
 		setMax(attributes.getInt(R.styleable.NumberProgressBar_max, 100));
+		//回收属性文件
 		attributes.recycle();
+		//初始化绘图
 		initializePainters();
 	}
 
@@ -106,14 +96,12 @@ public class NumberProgressBar extends View {
 
 	@Override
 	protected int getSuggestedMinimumHeight() {
-		return Math.max((int) mTextSize,
-				Math.max((int) mReachedBarHeight, (int) mUnreachedBarHeight));
+		return Math.max((int) mTextSize, Math.max((int) mReachedBarHeight, (int) mUnreachedBarHeight));
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		setMeasuredDimension(measure(widthMeasureSpec, true),
-				measure(heightMeasureSpec, false));
+		setMeasuredDimension(measure(widthMeasureSpec, true), measure(heightMeasureSpec, false));
 	}
 
 	private int measure(int measureSpec, boolean isWidth) {
@@ -145,7 +133,6 @@ public class NumberProgressBar extends View {
 		if (mDrawReachedBar) {
 			canvas.drawRect(mReachedRectF, mReachedBarPaint);
 		}
-
 		if (mDrawUnreachedBar) {
 			canvas.drawRect(mUnreachedRectF, mUnreachedBarPaint);
 		}
@@ -164,11 +151,14 @@ public class NumberProgressBar extends View {
 		mTextPaint.setTextSize(mTextSize);
 	}
 
+	/**
+	 * 计算绘图区域
+	 */
 	private void calculateDrawRectF() {
-		mCurrentDrawText = String
-				.format("%d%%", getProgress() * 100 / getMax());
+		mCurrentDrawText = String.format("%d%%", getProgress() * 100 / getMax());
 		mDrawTextWidth = mTextPaint.measureText(mCurrentDrawText);
 		if (getProgress() == 0) {
+			LogUtil.logi(TAG,"进入了getProgress() == 0");
 			mDrawReachedBar = false;
 			mDrawTextStart = getPaddingLeft();
 		} else {
@@ -260,6 +250,10 @@ public class NumberProgressBar extends View {
 		invalidate();
 	}
 
+	/**
+	 * 设置bar最大值
+	 * @param Max 最大值
+	 */
 	public void setMax(int Max) {
 		if (Max > 0) {
 			this.mMax = Max;
@@ -273,6 +267,10 @@ public class NumberProgressBar extends View {
 		}
 	}
 
+	/**
+	 * 设置progress
+	 * @param Progress 进度数据
+	 */
 	public void setProgress(int Progress) {
 		if (Progress <= getMax() && Progress >= 0) {
 			this.mProgress = Progress;
@@ -302,8 +300,7 @@ public class NumberProgressBar extends View {
 			mTextColor = bundle.getInt(INSTANCE_TEXT_COLOR);
 			mTextSize = bundle.getFloat(INSTANCE_TEXT_SIZE);
 			mReachedBarHeight = bundle.getFloat(INSTANCE_REACHED_BAR_HEIGHT);
-			mUnreachedBarHeight = bundle
-					.getFloat(INSTANCE_UNREACHED_BAR_HEIGHT);
+			mUnreachedBarHeight = bundle.getFloat(INSTANCE_UNREACHED_BAR_HEIGHT);
 			mReachedBarColor = bundle.getInt(INSTANCE_REACHED_BAR_COLOR);
 			mUnreachedBarColor = bundle.getInt(INSTANCE_UNREACHED_BAR_COLOR);
 			initializePainters();
